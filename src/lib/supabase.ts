@@ -1,16 +1,19 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@/types/database.types'
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL?.trim() ?? ''
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY?.trim() ?? ''
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn(
-    '[supabase] Missing VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY. Copy .env.example to .env and fill in your project values.',
-  )
+export const supabaseConfigError: string | null =
+  !supabaseUrl || !supabaseAnonKey
+    ? 'لم يتم ضبط اتصال قاعدة البيانات. أضف VITE_SUPABASE_URL و VITE_SUPABASE_ANON_KEY في إعدادات Environment Variables على Vercel ثم أعد النشر.'
+    : null
+
+if (supabaseConfigError) {
+  console.error('[supabase]', supabaseConfigError)
 }
 
-export const supabase = createClient<Database>(
-  supabaseUrl ?? '',
-  supabaseAnonKey ?? '',
+export const supabase: SupabaseClient<Database> = createClient<Database>(
+  supabaseUrl || 'https://placeholder.supabase.co',
+  supabaseAnonKey || 'public-anon-placeholder-key',
 )
