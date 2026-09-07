@@ -1,19 +1,23 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@/types/database.types'
+import { supabaseConfigError, supabaseEnv } from '@/lib/env'
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL?.trim() ?? ''
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY?.trim() ?? ''
+export { supabaseConfigError } from '@/lib/env'
 
-export const supabaseConfigError: string | null =
-  !supabaseUrl || !supabaseAnonKey
-    ? 'لم يتم ضبط اتصال قاعدة البيانات. أضف VITE_SUPABASE_URL و VITE_SUPABASE_ANON_KEY في إعدادات Environment Variables على Vercel ثم أعد النشر.'
-    : null
-
-if (supabaseConfigError) {
-  console.error('[supabase]', supabaseConfigError)
+function createConfiguredClient(): SupabaseClient<Database> {
+  return createClient<Database>(supabaseEnv.url, supabaseEnv.anonKey)
 }
 
-export const supabase: SupabaseClient<Database> = createClient<Database>(
-  supabaseUrl || 'https://placeholder.supabase.co',
-  supabaseAnonKey || 'public-anon-placeholder-key',
-)
+function createUnconfiguredClient(): SupabaseClient<Database> {
+  return new Proxy({} as SupabaseClient<Database>, {
+    get() {
+      throw new Error(
+        supabaseConfigError ?? 'Supabase is not configured.',
+      )
+    },
+  })
+}
+
+export const supabase: SupabaseClient<Database> = supabaseConfigError
+  ? createUnconfiguredClient()
+  : createConfiguredClient()

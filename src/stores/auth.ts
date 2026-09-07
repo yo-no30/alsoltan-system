@@ -33,6 +33,7 @@ export const useAuthStore = defineStore('auth', () => {
   const errorMessage = ref<string | null>(null)
 
   let authSubscriptionBound = false
+  let initializePromise: Promise<void> | null = null
 
   const isAuthenticated = computed(
     () => session.value !== null && profile.value !== null,
@@ -92,28 +93,44 @@ export const useAuthStore = defineStore('auth', () => {
       return
     }
 
-    try {
-      const { data, error } = await supabase.auth.getSession()
-
-      if (error) {
-        console.error('[auth] getSession failed:', error.message)
-        clearLocalState()
-      } else {
-        await applySession(data.session)
-      }
-
-      if (!authSubscriptionBound) {
-        authSubscriptionBound = true
-        supabase.auth.onAuthStateChange((_event, nextSession) => {
-          void applySession(nextSession)
-        })
-      }
-    } catch (error) {
-      console.error('[auth] initialize unexpected error:', error)
-      clearLocalState()
-    } finally {
-      isReady.value = true
+    if (initializePromise) {
+      await initializePromise
+      return
     }
+
+    initializePromise = (async () => {
+      try {
+        const sessionResult = await Promise.race([
+          supabase.auth.getSession(),
+          new Promise<never>((_resolve, reject) => {
+            window.setTimeout(() => {
+              reject(new Error('انتهت مهلة الاتصال بقاعدة البيانات'))
+            }, 5000)
+          }),
+        ])
+
+        if (sessionResult.error) {
+          console.error('[auth] getSession failed:', sessionResult.error.message)
+          clearLocalState()
+        } else {
+          await applySession(sessionResult.data.session)
+        }
+
+        if (!authSubscriptionBound) {
+          authSubscriptionBound = true
+          supabase.auth.onAuthStateChange((_event, nextSession) => {
+            void applySession(nextSession)
+          })
+        }
+      } catch (error) {
+        console.error('[auth] initialize unexpected error:', error)
+        clearLocalState()
+      } finally {
+        isReady.value = true
+      }
+    })()
+
+    await initializePromise
   }
 
   async function signIn(
