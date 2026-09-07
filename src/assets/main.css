@@ -1,0 +1,112 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    @apply antialiased;
+    direction: rtl;
+  }
+
+  body {
+    @apply m-0 min-h-dvh bg-slate-50 text-start text-slate-900;
+    direction: rtl;
+    font-size: 14px;
+    line-height: 1.45;
+    font-family:
+      'SF Pro Text',
+      'Segoe UI',
+      Tahoma,
+      -apple-system,
+      BlinkMacSystemFont,
+      Roboto,
+      'Helvetica Neue',
+      Arial,
+      sans-serif;
+  }
+
+  #app {
+    @apply min-h-dvh;
+    direction: rtl;
+  }
+
+  input,
+  textarea,
+  select,
+  button {
+    text-align: inherit;
+  }
+
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-brand-500;
+  }
+}
+
+@layer components {
+  .surface-glass {
+    @apply border border-slate-200/70 bg-white/80 shadow-sm backdrop-blur-md;
+  }
+
+  .surface-panel {
+    @apply border border-slate-200/70 bg-white shadow-sm;
+  }
+}
+
+@media print {
+  html,
+  body {
+    background: #fff !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    direction: rtl !important;
+  }
+
+  body.printing-thermal {
+    @page {
+      size: 80mm auto;
+      margin: 0;
+    }
+  }
+
+  body.printing-thermal * {
+    visibility: hidden !important;
+  }
+
+  body.printing-thermal .thermal-receipt,
+  body.printing-thermal .thermal-receipt * {
+    visibility: visible !important;
+  }
+
+  body.printing-thermal .thermal-receipt {
+    position: absolute !important;
+    inset: 0 auto auto 0 !important;
+    display: block !important;
+  }
+
+  body.printing-report {
+    @page {
+      size: A4;
+      margin: 12mm;
+    }
+  }
+
+  body.printing-report .no-print {
+    display: none !important;
+  }
+
+  body.printing-report * {
+    visibility: hidden !important;
+  }
+
+  body.printing-report .print-report,
+  body.printing-report .print-report * {
+    visibility: visible !important;
+  }
+
+  body.printing-report .print-report {
+    position: absolute !important;
+    inset: 0 !important;
+    display: block !important;
+    width: 100% !important;
+  }
+}

@@ -1,0 +1,60 @@
+# Sultan Beverages (مشروبات السلطان) - Cursor Rules & Core Principles
+
+## CORE PRIORITIES
+- PERFORMANCE, UNCOMPROMISING QUALITY, RIGOROUS SECURITY, AND CLEAN CODE ARE THE TOP PRIORITIES IN THIS PROJECT.
+- Every piece of code generated must be production-ready, fully typed, optimized for quick execution, secure against unauthorized access, and structured following clean architecture guidelines.
+
+---
+
+## 1. Project Architecture & Code Standards
+- Tech Stack: Vue 3 (Composition API using <script setup lang="ts">), Vite, TypeScript, Tailwind CSS, and Supabase.
+- Modular Organization:
+  - src/components/ui/ -> Atomic, highly reusable presentation elements.
+  - src/components/layout/ -> Core shell structure (AppHeader, AppSidebar, MainLayout).
+  - src/views/ -> Route-level views (POS, Inventory, Purchases, Suppliers, Reports, Auth).
+  - src/stores/ -> Pinia modules for state management.
+  - src/composables/ -> Isolated, testable logic for Supabase API interactions and network status.
+  - src/types/ -> Explicit TypeScript declarations and Supabase generated schema types.
+- TypeScript Enforcement:
+  - Strict mode enabled (noImplicitAny, strictNullChecks).
+  - NO any type usage under any condition. Define clean interfaces or type unions.
+
+---
+
+## 2. Design System & Apple Human Interface Guidelines
+- Visual Identity: Clean Light Mode with Apple-inspired minimalist aesthetic.
+- Primary Brand Palette: Burgundy / Deep Wine #800020 (configured cleanly across Tailwind shades 50 to 900).
+- Aesthetics:
+  - Subtle borders (border-slate-200/70), soft dynamic drop shadows (shadow-sm), and backdrop blur (backdrop-blur-md).
+  - Ample padding, crisp typography hierarchy, clear focus indicators, and smooth state transitions.
+  - ZERO "AI-style clichés": Do NOT generate neon gradients, saturated floating circles, or unnatural bright glow effects.
+
+---
+
+## 3. Database Architecture & Versioning (Supabase & PostgreSQL)
+- Version-Controlled Migrations:
+  - ALL database changes must strictly reside in supabase/migrations/ as numbered SQL scripts (e.g., 00001_initial_schema.sql).
+  - NEVER alter, create, or drop tables/columns inside frontend application code.
+- Row Level Security (RLS) & Security Protocols:
+  - RLS MUST be explicitly enabled on every table.
+  - Granular access policies must enforce role boundaries: admin retains full permissions; cashier holds restricted read/write access necessary solely for POS terminal operation.
+  - All database queries must run through Supabase client TypeScript definitions.
+
+---
+
+## 4. Performance & Offline-First Engineering
+- Offline Resiliency:
+  - Intercept sales transactions when navigator.onLine === false.
+  - Queue pending transactions locally via IndexedDB (Dexie.js) or Pinia local storage persistence.
+  - Auto-sync queued transactions to Supabase sequentially upon network restoration with clear timestamping.
+- UI/UX Optimization:
+  - Minimize unnecessary component re-renders.
+  - Implement debounced user input handlers for searching and barcoding.
+  - Lazy-load views and heavy components via Vue Router dynamic imports.
+
+---
+
+## 5. Security & Error Handling
+- Never expose sensitive service keys or private configuration in client code.
+- Wrap all async Supabase API calls in clean try/catch blocks with explicit error logging and user-friendly toast notifications.
+- Input Validation: Sanitize and validate all user inputs (forms, prices, quantities) before dispatching mutations.

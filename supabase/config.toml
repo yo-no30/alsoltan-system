@@ -1,0 +1,9 @@
+{
+  "name": "alsoltan-system",
+  "project_id": "",
+  "functions": {
+    "manage-staff": {
+      "verify_jwt": true
+    }
+  }
+}
