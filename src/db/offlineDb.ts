@@ -42,7 +42,11 @@ class AlsoltanOfflineDb extends Dexie {
           .table('pending_sales')
           .toCollection()
           .modify((sale) => {
-            const row = sale as PendingSaleRecord & { paymentType: string }
+            const row = sale as {
+              customerId?: string | null
+              customerName?: string | null
+              paymentType?: SalePaymentType | 'card'
+            }
             if (row.customerId === undefined) {
               row.customerId = null
             }
