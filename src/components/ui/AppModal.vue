@@ -21,6 +21,11 @@ const sizeClass: Record<'md' | 'lg' | 'xl', string> = {
   xl: 'max-w-4xl',
 }
 
+function setModalOpenState(isOpen: boolean): void {
+  document.body.style.overflow = isOpen ? 'hidden' : ''
+  document.documentElement.classList.toggle('modal-open', isOpen)
+}
+
 function onKeydown(event: KeyboardEvent): void {
   if (event.key === 'Escape' && props.open) {
     emit('close')
@@ -34,8 +39,9 @@ function onOverlayClick(): void {
 watch(
   () => props.open,
   (isOpen) => {
-    document.body.style.overflow = isOpen ? 'hidden' : ''
+    setModalOpenState(isOpen)
   },
+  { immediate: true },
 )
 
 onMounted(() => {
@@ -44,7 +50,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   window.removeEventListener('keydown', onKeydown)
-  document.body.style.overflow = ''
+  setModalOpenState(false)
 })
 </script>
 
@@ -58,7 +64,7 @@ onUnmounted(() => {
       :aria-label="title"
     >
       <div
-        class="absolute inset-0 bg-slate-900/30 backdrop-blur-sm"
+        class="absolute inset-0 bg-slate-900/40"
         @click="onOverlayClick"
       />
 

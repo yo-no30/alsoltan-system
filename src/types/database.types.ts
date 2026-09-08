@@ -77,6 +77,7 @@ export interface Database {
           stock_quantity: number
           min_stock_alert: number
           is_active: boolean
+          image_url: string | null
           created_at: string
         }
         Insert: {
@@ -88,6 +89,7 @@ export interface Database {
           stock_quantity?: number
           min_stock_alert?: number
           is_active?: boolean
+          image_url?: string | null
           created_at?: string
         }
         Update: {
@@ -99,6 +101,7 @@ export interface Database {
           stock_quantity?: number
           min_stock_alert?: number
           is_active?: boolean
+          image_url?: string | null
           created_at?: string
         }
         Relationships: [

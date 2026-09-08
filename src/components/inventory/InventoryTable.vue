@@ -28,9 +28,10 @@ function isLowStock(product: Product): boolean {
 
 <template>
   <div class="overflow-x-auto rounded-2xl border border-slate-200/70 bg-white shadow-sm">
-    <table class="min-w-[56rem] text-sm">
+    <table class="min-w-[60rem] text-sm">
       <thead class="border-b border-slate-200/70 bg-slate-50/80 text-slate-600">
         <tr>
+          <th class="px-3 py-2 text-start font-medium">الصورة</th>
           <th class="px-3 py-2 text-start font-medium">المنتج</th>
           <th class="px-3 py-2 text-start font-medium">القسم</th>
           <th class="px-3 py-2 text-start font-medium">سعر البيع</th>
@@ -43,7 +44,7 @@ function isLowStock(product: Product): boolean {
       </thead>
       <tbody>
         <tr v-if="products.length === 0">
-          <td colspan="8" class="px-4 py-10 text-center text-slate-400">
+          <td colspan="9" class="px-4 py-10 text-center text-slate-400">
             لا توجد منتجات مطابقة
           </td>
         </tr>
@@ -52,6 +53,19 @@ function isLowStock(product: Product): boolean {
           :key="product.id"
           class="border-b border-slate-100 last:border-0"
         >
+          <td class="px-3 py-2">
+            <div
+              class="flex h-11 w-11 overflow-hidden rounded-lg border border-slate-200/70 bg-slate-50"
+            >
+              <img
+                v-if="product.image_url"
+                :src="product.image_url"
+                :alt="product.name"
+                class="h-full w-full object-cover"
+                loading="lazy"
+              />
+            </div>
+          </td>
           <td class="px-3 py-2 font-medium text-slate-900">
             <div class="flex flex-wrap items-center gap-2">
               <span>{{ product.name }}</span>

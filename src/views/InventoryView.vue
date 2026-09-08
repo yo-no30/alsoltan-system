@@ -65,14 +65,34 @@ async function onSaveProduct(payload: {
   stock_quantity: number
   min_stock_alert: number
   is_active: boolean
+  imageFile: File | null
+  removeImage: boolean
 }): Promise<void> {
+  const { imageFile, removeImage, ...productFields } = payload
+
   const result = editingProduct.value
-    ? await inventory.updateProduct(editingProduct.value.id, payload)
-    : await inventory.createProduct(payload)
+    ? await inventory.updateProduct(editingProduct.value.id, productFields)
+    : await inventory.createProduct(productFields)
 
   if (!result.ok) {
     toast.error(result.message)
     return
+  }
+
+  const productId = result.data.id
+
+  if (imageFile) {
+    const imageResult = await inventory.uploadProductImage(productId, imageFile)
+    if (!imageResult.ok) {
+      toast.error(imageResult.message)
+      return
+    }
+  } else if (removeImage) {
+    const removeResult = await inventory.removeProductImage(productId)
+    if (!removeResult.ok) {
+      toast.error(removeResult.message)
+      return
+    }
   }
 
   toast.success(editingProduct.value ? 'تم تحديث المنتج' : 'تم إضافة المنتج')

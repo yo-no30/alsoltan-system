@@ -52,6 +52,12 @@
   }
 }
 
+/* Avoid GPU crashes on Windows when native dialogs / image decode run under blur layers. */
+html.modal-open [class*='backdrop-blur'] {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
 @media print {
   html,
   body {

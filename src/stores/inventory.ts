@@ -1,6 +1,14 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import { supabase } from '@/lib/supabase'
+import {
+  PRODUCT_IMAGES_BUCKET,
+  buildProductImagePath,
+  publicUrlForPath,
+  resolveImageMime,
+  storagePathFromPublicUrl,
+  validateProductImage,
+} from '@/utils/productImage'
 import type {
   Category,
   CategoryInsert,
@@ -302,6 +310,111 @@ export const useInventoryStore = defineStore('inventory', () => {
     })
   }
 
+  async function uploadProductImage(
+    productId: string,
+    file: File,
+  ): Promise<StoreResult<Product>> {
+    isSaving.value = true
+    try {
+      const validationError = validateProductImage(file)
+      if (validationError) {
+        return { ok: false, message: validationError }
+      }
+
+      const product = products.value.find((entry) => entry.id === productId)
+      const previousPath = storagePathFromPublicUrl(product?.image_url)
+
+      const path = buildProductImagePath(productId, file)
+      const contentType = resolveImageMime(file) ?? file.type
+      const { error: uploadError } = await supabase.storage
+        .from(PRODUCT_IMAGES_BUCKET)
+        .upload(path, file, {
+          cacheControl: '3600',
+          upsert: false,
+          contentType,
+        })
+
+      if (uploadError) {
+        console.error('[inventory] upload image:', uploadError.message)
+        return {
+          ok: false,
+          message: mapError(uploadError, 'تعذر رفع صورة المنتج.'),
+        }
+      }
+
+      const imageUrl = publicUrlForPath(path)
+      const { data, error } = await supabase
+        .from('products')
+        .update({ image_url: imageUrl })
+        .eq('id', productId)
+        .select('*')
+        .single()
+
+      if (error || !data) {
+        await supabase.storage.from(PRODUCT_IMAGES_BUCKET).remove([path])
+        console.error('[inventory] set image_url:', error?.message)
+        return {
+          ok: false,
+          message: mapError(error, 'تعذر حفظ رابط صورة المنتج.'),
+        }
+      }
+
+      upsertProduct(data)
+
+      if (previousPath && previousPath !== path) {
+        void supabase.storage.from(PRODUCT_IMAGES_BUCKET).remove([previousPath])
+      }
+
+      return { ok: true, data }
+    } catch (error) {
+      console.error('[inventory] uploadProductImage unexpected:', error)
+      return { ok: false, message: 'حدث خطأ أثناء رفع صورة المنتج.' }
+    } finally {
+      isSaving.value = false
+    }
+  }
+
+  async function removeProductImage(
+    productId: string,
+  ): Promise<StoreResult<Product>> {
+    isSaving.value = true
+    try {
+      const product = products.value.find((entry) => entry.id === productId)
+      if (!product) {
+        return { ok: false, message: 'المنتج غير موجود.' }
+      }
+
+      const path = storagePathFromPublicUrl(product.image_url)
+      const { data, error } = await supabase
+        .from('products')
+        .update({ image_url: null })
+        .eq('id', productId)
+        .select('*')
+        .single()
+
+      if (error || !data) {
+        console.error('[inventory] clear image_url:', error?.message)
+        return {
+          ok: false,
+          message: mapError(error, 'تعذر حذف صورة المنتج.'),
+        }
+      }
+
+      upsertProduct(data)
+
+      if (path) {
+        void supabase.storage.from(PRODUCT_IMAGES_BUCKET).remove([path])
+      }
+
+      return { ok: true, data }
+    } catch (error) {
+      console.error('[inventory] removeProductImage unexpected:', error)
+      return { ok: false, message: 'حدث خطأ أثناء حذف صورة المنتج.' }
+    } finally {
+      isSaving.value = false
+    }
+  }
+
   return {
     products,
     categories,
@@ -323,5 +436,7 @@ export const useInventoryStore = defineStore('inventory', () => {
     updateProduct,
     toggleProductActive,
     adjustStock,
+    uploadProductImage,
+    removeProductImage,
   }
 })
