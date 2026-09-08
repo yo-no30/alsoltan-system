@@ -2,6 +2,7 @@
 import { computed, reactive, watch } from 'vue'
 import { Plus, Trash2 } from '@lucide/vue'
 import AppModal from '@/components/ui/AppModal.vue'
+import MoneyAmount from '@/components/ui/MoneyAmount.vue'
 import { calcPurchaseTotal, type PurchaseLineInput } from '@/stores/purchases'
 import type { Product } from '@/types/database.types'
 import type { PurchasePaymentType } from '@/types/database.types'
@@ -114,13 +115,6 @@ function onProductChange(line: FormLine): void {
   if (product) {
     line.cost_price = String(product.cost_price)
   }
-}
-
-function formatMoney(value: number): string {
-  return value.toLocaleString('ar-SA', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })
 }
 
 function onSubmit(): void {
@@ -301,7 +295,7 @@ function onSubmit(): void {
       >
         <span class="text-sm text-slate-600">إجمالي الفاتورة</span>
         <span class="text-base font-bold text-brand-700">
-          {{ formatMoney(total) }} ر.ي
+          <MoneyAmount :amount="total" />
         </span>
       </div>
 

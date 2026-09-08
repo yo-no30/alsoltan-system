@@ -1,5 +1,6 @@
 ﻿<script setup lang="ts">
 import { ImageOff } from '@lucide/vue'
+import MoneyAmount from '@/components/ui/MoneyAmount.vue'
 import { formatStockLabel } from '@/utils/stockUnits'
 import type { Product } from '@/types/database.types'
 
@@ -10,13 +11,6 @@ defineProps<{
 const emit = defineEmits<{
   add: []
 }>()
-
-function formatPrice(value: number): string {
-  return value.toLocaleString('ar-YE', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 2,
-  })
-}
 </script>
 
 <template>
@@ -48,9 +42,8 @@ function formatPrice(value: number): string {
         {{ product.name }}
       </p>
       <div class="mt-auto flex items-end justify-between gap-1">
-        <p class="text-xs font-semibold tabular-nums text-slate-900">
-          {{ formatPrice(product.price) }}
-          <span class="text-[10px] font-normal text-slate-500">ر.ي</span>
+        <p class="text-xs font-semibold text-slate-900">
+          <MoneyAmount :amount="Number(product.price)" />
         </p>
         <span
           class="max-w-[55%] truncate text-[9px] leading-tight text-slate-500"

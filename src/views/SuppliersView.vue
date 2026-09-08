@@ -4,6 +4,7 @@ import { Plus, RefreshCw } from '@lucide/vue'
 import SuppliersTable from '@/components/suppliers/SuppliersTable.vue'
 import SupplierFormModal from '@/components/suppliers/SupplierFormModal.vue'
 import SupplierPaymentModal from '@/components/suppliers/SupplierPaymentModal.vue'
+import MoneyAmount from '@/components/ui/MoneyAmount.vue'
 import { useSuppliersStore } from '@/stores/suppliers'
 import { useToast } from '@/stores/toast'
 import type { Supplier } from '@/types/database.types'
@@ -82,7 +83,7 @@ onMounted(() => {
             v-if="suppliersStore.totalDebt > 0"
             class="ms-2 font-medium text-amber-700"
           >
-            (إجمالي الديون: {{ suppliersStore.totalDebt.toLocaleString('ar-SA', { minimumFractionDigits: 2 }) }} ر.ي)
+            (إجمالي الديون: <MoneyAmount :amount="suppliersStore.totalDebt" />)
           </span>
         </p>
       </div>

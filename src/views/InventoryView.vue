@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { Plus, FolderTree, RefreshCw, Package, AlertTriangle, Ban } from '@lucide/vue'
+import { Plus, FolderTree, RefreshCw } from '@lucide/vue'
 import InventoryFilters from '@/components/inventory/InventoryFilters.vue'
 import InventoryTable from '@/components/inventory/InventoryTable.vue'
 import ProductFormModal from '@/components/inventory/ProductFormModal.vue'
 import CategoryFormModal from '@/components/inventory/CategoryFormModal.vue'
-import StockAdjustModal from '@/components/inventory/StockAdjustModal.vue'
 import { useInventoryStore } from '@/stores/inventory'
 import { useToast } from '@/stores/toast'
 import type { Product } from '@/types/database.types'
@@ -19,9 +18,7 @@ const lowStockOnly = ref(false)
 
 const productModalOpen = ref(false)
 const categoryModalOpen = ref(false)
-const stockModalOpen = ref(false)
 const editingProduct = ref<Product | null>(null)
-const stockProduct = ref<Product | null>(null)
 
 const filteredProducts = computed(() => {
   const query = search.value.trim().toLowerCase()
@@ -42,7 +39,6 @@ const stats = computed(() => {
   return {
     total: all.length,
     lowStock: all.filter((p) => p.stock_quantity <= p.min_stock_alert).length,
-    inactive: all.filter((p) => !p.is_active).length,
     shown: filteredProducts.value.length,
   }
 })
@@ -60,11 +56,6 @@ function openCreateProduct(): void {
 function openEditProduct(product: Product): void {
   editingProduct.value = product
   productModalOpen.value = true
-}
-
-function openStock(product: Product): void {
-  stockProduct.value = product
-  stockModalOpen.value = true
 }
 
 async function onSaveProduct(payload: {
@@ -135,17 +126,6 @@ async function onUpdateCategory(id: string, name: string): Promise<void> {
   toast.success('تم تحديث القسم')
 }
 
-async function onAdjustStock(quantity: number): Promise<void> {
-  if (!stockProduct.value) return
-  const result = await inventory.adjustStock(stockProduct.value.id, quantity)
-  if (!result.ok) {
-    toast.error(result.message)
-    return
-  }
-  toast.success('تم تحديث المخزون')
-  stockModalOpen.value = false
-}
-
 async function onToggleActive(product: Product): Promise<void> {
   const result = await inventory.toggleProductActive(product.id)
   if (!result.ok) {
@@ -161,24 +141,21 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="flex min-h-0 flex-1 flex-col gap-3">
-    <header
-      class="flex shrink-0 flex-col gap-3 border-b border-slate-200 pb-3 sm:flex-row sm:items-center sm:justify-between"
-    >
-      <div class="min-w-0">
-        <h1 class="text-base font-semibold text-slate-900">المنتجات والمخزون</h1>
-        <p class="mt-1 text-xs text-slate-500">
-          عرض
-          <span class="font-medium text-slate-700">{{ stats.shown }}</span>
-          من
-          <span class="font-medium text-slate-700">{{ stats.total }}</span>
-          منتج
-        </p>
-      </div>
+  <section
+    class="flex min-h-0 min-w-0 flex-1 flex-col gap-3 overflow-hidden rounded-xl border border-slate-200/70 bg-white p-3 shadow-sm sm:gap-3.5 sm:p-4"
+  >
+    <div class="flex shrink-0 flex-wrap items-center justify-between gap-2">
+      <p class="text-xs text-slate-500">
+        عرض
+        <span class="font-semibold text-slate-800">{{ stats.shown }}</span>
+        من
+        <span class="font-semibold text-slate-800">{{ stats.total }}</span>
+        منتج
+      </p>
       <div class="flex flex-wrap items-center gap-2">
         <button
           type="button"
-          class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+          class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200/70 bg-white px-3 py-2 text-xs font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:opacity-60"
           :disabled="inventory.isLoading"
           @click="load"
         >
@@ -191,7 +168,7 @@ onMounted(() => {
         </button>
         <button
           type="button"
-          class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50"
+          class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200/70 bg-white px-3 py-2 text-xs font-medium text-slate-700 shadow-sm transition hover:bg-slate-50"
           @click="categoryModalOpen = true"
         >
           <FolderTree class="h-4 w-4" :stroke-width="1.75" />
@@ -199,66 +176,36 @@ onMounted(() => {
         </button>
         <button
           type="button"
-          class="inline-flex items-center gap-1.5 rounded-lg bg-brand-500 px-3 py-2 text-xs font-semibold text-white hover:bg-brand-600"
+          class="inline-flex items-center gap-1.5 rounded-lg bg-brand-500 px-3 py-2 text-xs font-semibold text-white shadow-sm shadow-brand-500/25 transition hover:bg-brand-600"
           @click="openCreateProduct"
         >
           <Plus class="h-4 w-4" :stroke-width="2" />
           منتج جديد
         </button>
       </div>
-    </header>
-
-    <div class="grid shrink-0 grid-cols-3 gap-2">
-      <div class="rounded-lg border border-slate-200 bg-white px-3 py-2.5">
-        <div class="flex items-center gap-1.5 text-xs text-slate-500">
-          <Package class="h-3.5 w-3.5" :stroke-width="1.75" />
-          الإجمالي
-        </div>
-        <p class="mt-1 text-lg font-semibold tabular-nums text-slate-900">
-          {{ stats.total }}
-        </p>
-      </div>
-      <div class="rounded-lg border border-slate-200 bg-white px-3 py-2.5">
-        <div class="flex items-center gap-1.5 text-xs text-slate-500">
-          <AlertTriangle class="h-3.5 w-3.5" :stroke-width="1.75" />
-          مخزون منخفض
-        </div>
-        <p class="mt-1 text-lg font-semibold tabular-nums text-slate-900">
-          {{ stats.lowStock }}
-        </p>
-      </div>
-      <div class="rounded-lg border border-slate-200 bg-white px-3 py-2.5">
-        <div class="flex items-center gap-1.5 text-xs text-slate-500">
-          <Ban class="h-3.5 w-3.5" :stroke-width="1.75" />
-          موقوف
-        </div>
-        <p class="mt-1 text-lg font-semibold tabular-nums text-slate-900">
-          {{ stats.inactive }}
-        </p>
-      </div>
     </div>
 
     <InventoryFilters
       v-model:search="search"
-      v-model:category-id="categoryId"
       v-model:low-stock-only="lowStockOnly"
-      :categories="inventory.categories"
+      :low-stock-count="stats.lowStock"
     />
 
     <div class="min-h-0 flex-1 overflow-hidden">
       <div
         v-if="inventory.isLoading"
-        class="flex h-48 items-center justify-center rounded-lg border border-slate-200 bg-white text-sm text-slate-400"
+        class="flex h-full min-h-48 items-center justify-center rounded-xl border border-slate-200/70 bg-white/90 text-sm text-slate-400 shadow-sm"
       >
         جاري تحميل المخزون...
       </div>
       <InventoryTable
         v-else
+        v-model:category-id="categoryId"
         :products="filteredProducts"
+        :categories="inventory.categories"
         :category-name="inventory.categoryName"
         :is-busy="inventory.isSaving"
         @edit="openEditProduct"
-        @adjust-stock="openStock"
         @toggle-active="onToggleActive"
       />
     </div>
@@ -280,13 +227,5 @@ onMounted(() => {
       @create="onCreateCategory"
       @update="onUpdateCategory"
     />
-
-    <StockAdjustModal
-      :open="stockModalOpen"
-      :product="stockProduct"
-      :is-saving="inventory.isSaving"
-      @close="stockModalOpen = false"
-      @save="onAdjustStock"
-    />
-  </div>
+  </section>
 </template>

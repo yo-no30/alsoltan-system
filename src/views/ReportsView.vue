@@ -9,7 +9,7 @@ import ReportExportBar from '@/components/reports/ReportExportBar.vue'
 import PrintableReport from '@/components/reports/PrintableReport.vue'
 import { useReports } from '@/composables/useReports'
 import { useToast } from '@/stores/toast'
-import { CURRENCY_LABEL, formatMoney } from '@/utils/currency'
+import { CURRENCY_NAME, formatMoneyWithCurrency } from '@/utils/currency'
 import { toDateInputValue } from '@/utils/dateRange'
 import { formatStockLabel } from '@/utils/stockUnits'
 import {
@@ -75,7 +75,7 @@ function buildSalesPdfInput() {
       'العميل',
       'التاريخ',
       'طريقة الدفع',
-      `الإجمالي (${CURRENCY_LABEL})`,
+      `الإجمالي (${CURRENCY_NAME})`,
       'الحالة',
     ],
     rows: sales.value.map((sale) => [
@@ -83,7 +83,7 @@ function buildSalesPdfInput() {
       sale.customer_name || '—',
       new Date(sale.created_at).toLocaleString('ar-YE'),
       sale.payment_type === 'cash' ? 'نقداً' : 'آجل',
-      formatMoney(Number(sale.total_amount)),
+      formatMoneyWithCurrency(Number(sale.total_amount)),
       sale.status === 'synced_offline' ? 'مزامنة أوفلاين' : 'مكتملة',
     ]),
   }
@@ -99,8 +99,8 @@ function buildInventoryPdfInput() {
       'المخزون',
       'قطعة/كرتون',
       'حد التنبيه',
-      `سعر البيع (${CURRENCY_LABEL})`,
-      `سعر التكلفة (${CURRENCY_LABEL})`,
+      `سعر البيع (${CURRENCY_NAME})`,
+      `سعر التكلفة (${CURRENCY_NAME})`,
       'الحالة',
     ],
     rows: productsSnapshot.value.map((product) => [
@@ -108,8 +108,8 @@ function buildInventoryPdfInput() {
       formatStockLabel(product.stock_quantity, product.pieces_per_carton),
       product.pieces_per_carton,
       product.min_stock_alert,
-      formatMoney(Number(product.price)),
-      formatMoney(Number(product.cost_price)),
+      formatMoneyWithCurrency(Number(product.price)),
+      formatMoneyWithCurrency(Number(product.cost_price)),
       product.is_active ? 'نشط' : 'موقوف',
     ]),
   }

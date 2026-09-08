@@ -4,6 +4,7 @@ import { Plus, RefreshCw } from '@lucide/vue'
 import CustomersTable from '@/components/customers/CustomersTable.vue'
 import CustomerFormModal from '@/components/customers/CustomerFormModal.vue'
 import CustomerPaymentModal from '@/components/customers/CustomerPaymentModal.vue'
+import MoneyAmount from '@/components/ui/MoneyAmount.vue'
 import { useCustomersStore } from '@/stores/customers'
 import { useToast } from '@/stores/toast'
 import type { Customer } from '@/types/database.types'
@@ -84,12 +85,7 @@ onMounted(() => {
             class="ms-2 font-medium text-amber-700"
           >
             (إجمالي الذمم:
-            {{
-              customersStore.totalReceivables.toLocaleString('ar-SA', {
-                minimumFractionDigits: 2,
-              })
-            }}
-            ر.ي)
+            <MoneyAmount :amount="customersStore.totalReceivables" />)
           </span>
         </p>
       </div>

@@ -1,16 +1,10 @@
 ﻿<script setup lang="ts">
+import MoneyAmount from '@/components/ui/MoneyAmount.vue'
 import type { ReceiptData } from '@/composables/useSales'
 
 defineProps<{
   receipt: ReceiptData | null
 }>()
-
-function formatMoney(value: number): string {
-  return value.toLocaleString('ar-SA', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })
-}
 
 function formatDateTime(iso: string): string {
   try {
@@ -61,8 +55,8 @@ function paymentLabel(type: ReceiptData['paymentType']): string {
         <tr v-for="(item, index) in receipt.items" :key="index">
           <td>{{ item.name }}</td>
           <td>{{ item.quantity }}</td>
-          <td>{{ formatMoney(item.unitPrice) }}</td>
-          <td>{{ formatMoney(item.totalPrice) }}</td>
+          <td><MoneyAmount :amount="item.unitPrice" /></td>
+          <td><MoneyAmount :amount="item.totalPrice" /></td>
         </tr>
       </tbody>
     </table>
@@ -70,15 +64,15 @@ function paymentLabel(type: ReceiptData['paymentType']): string {
     <footer class="thermal-footer">
       <p>
         <span>المجموع الفرعي</span>
-        <strong>{{ formatMoney(receipt.subtotal) }} ر.ي</strong>
+        <strong><MoneyAmount :amount="receipt.subtotal" /></strong>
       </p>
       <p v-if="receipt.discount > 0">
         <span>الخصم</span>
-        <strong>{{ formatMoney(receipt.discount) }} ر.ي</strong>
+        <strong><MoneyAmount :amount="receipt.discount" /></strong>
       </p>
       <p class="thermal-total">
         <span>الإجمالي</span>
-        <strong>{{ formatMoney(receipt.totalAmount) }} ر.ي</strong>
+        <strong><MoneyAmount :amount="receipt.totalAmount" /></strong>
       </p>
       <p>
         <span>طريقة الدفع</span>

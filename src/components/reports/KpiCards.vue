@@ -1,17 +1,12 @@
 ﻿<script setup lang="ts">
+import MoneyAmount from '@/components/ui/MoneyAmount.vue'
+
 defineProps<{
   totalRevenue: number
   netProfit: number
   totalSupplierDebt: number
   lowStockCount: number
 }>()
-
-function formatMoney(value: number): string {
-  return value.toLocaleString('ar-SA', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })
-}
 </script>
 
 <template>
@@ -19,8 +14,7 @@ function formatMoney(value: number): string {
     <article class="rounded-xl border border-slate-200/70 bg-white p-3 shadow-sm">
       <p class="text-[11px] font-medium text-slate-500">إجمالي المبيعات</p>
       <p class="mt-1 text-lg font-semibold tracking-tight text-slate-900">
-        {{ formatMoney(totalRevenue) }}
-        <span class="text-xs font-medium text-slate-500">ر.ي</span>
+        <MoneyAmount :amount="totalRevenue" />
       </p>
     </article>
 
@@ -30,16 +24,14 @@ function formatMoney(value: number): string {
         class="mt-1 text-lg font-semibold tracking-tight"
         :class="netProfit >= 0 ? 'text-brand-700' : 'text-red-700'"
       >
-        {{ formatMoney(netProfit) }}
-        <span class="text-xs font-medium text-slate-500">ر.ي</span>
+        <MoneyAmount :amount="netProfit" />
       </p>
     </article>
 
     <article class="rounded-xl border border-slate-200/70 bg-white p-3 shadow-sm">
       <p class="text-[11px] font-medium text-slate-500">إجمالي الديون للموردين</p>
       <p class="mt-1 text-lg font-semibold tracking-tight text-amber-700">
-        {{ formatMoney(totalSupplierDebt) }}
-        <span class="text-xs font-medium text-slate-500">ر.ي</span>
+        <MoneyAmount :amount="totalSupplierDebt" />
       </p>
     </article>
 

@@ -13,6 +13,7 @@ import {
   Legend,
 } from 'chart.js'
 import type { TrendPoint } from '@/composables/useReports'
+import { formatMoneyWithCurrency } from '@/utils/currency'
 
 ChartJS.register(
   CategoryScale,
@@ -53,9 +54,7 @@ const chartOptions = {
     tooltip: {
       callbacks: {
         label: (context: { parsed: { y: number | null } }) =>
-          `${(context.parsed.y ?? 0).toLocaleString('ar-SA', {
-            minimumFractionDigits: 2,
-          })} ر.ي`,
+          formatMoneyWithCurrency(context.parsed.y ?? 0),
       },
     },
   },

@@ -146,30 +146,14 @@ export const useSuppliersStore = defineStore('suppliers', () => {
   ): Promise<StoreResult<Supplier>> {
     isSaving.value = true
     try {
-      const supplier = suppliers.value.find((entry) => entry.id === supplierId)
-      if (!supplier) {
-        return { ok: false, message: 'المورد غير موجود.' }
-      }
-
       if (!Number.isFinite(amount) || amount <= 0) {
         return { ok: false, message: 'مبلغ التسديد يجب أن يكون أكبر من صفر.' }
       }
 
-      const balance = Number(supplier.balance_due)
-      if (amount > balance) {
-        return {
-          ok: false,
-          message: 'مبلغ التسديد أكبر من رصيد الدين المستحق.',
-        }
-      }
-
-      const nextBalance = roundMoney(balance - amount)
-      const { data, error } = await supabase
-        .from('suppliers')
-        .update({ balance_due: nextBalance })
-        .eq('id', supplierId)
-        .select('*')
-        .single()
+      const { data, error } = await supabase.rpc('record_supplier_payment', {
+        p_supplier_id: supplierId,
+        p_amount: amount,
+      })
 
       if (error || !data) {
         console.error('[suppliers] payment:', error?.message)

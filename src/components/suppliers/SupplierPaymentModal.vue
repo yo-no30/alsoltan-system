@@ -1,6 +1,7 @@
 ﻿<script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import AppModal from '@/components/ui/AppModal.vue'
+import MoneyAmount from '@/components/ui/MoneyAmount.vue'
 import type { Supplier } from '@/types/database.types'
 
 const props = defineProps<{
@@ -29,13 +30,6 @@ watch(
   },
 )
 
-function formatMoney(value: number): string {
-  return value.toLocaleString('ar-SA', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })
-}
-
 function onSubmit(): void {
   const parsed = Number.parseFloat(amount.value)
   if (!Number.isFinite(parsed) || parsed <= 0) {
@@ -59,7 +53,7 @@ function onSubmit(): void {
         <span class="font-semibold text-slate-900">{{ supplier?.name }}</span>
       </p>
       <p class="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
-        الدين الحالي: {{ formatMoney(balance) }} ر.ي
+        الدين الحالي: <MoneyAmount :amount="balance" />
       </p>
       <div>
         <label class="mb-1.5 block text-sm font-medium text-slate-700">

@@ -1,17 +1,11 @@
 ﻿<script setup lang="ts">
+import MoneyAmount from '@/components/ui/MoneyAmount.vue'
 import type { PaymentBreakdown, PurchaseSummary } from '@/composables/useReports'
 
 defineProps<{
   payments: PaymentBreakdown[]
   purchases: PurchaseSummary
 }>()
-
-function formatMoney(value: number): string {
-  return value.toLocaleString('ar-SA', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })
-}
 </script>
 
 <template>
@@ -38,7 +32,7 @@ function formatMoney(value: number): string {
               <td class="px-2 py-2.5 text-slate-800">{{ row.label }}</td>
               <td class="px-2 py-2.5 text-slate-600">{{ row.count }}</td>
               <td class="px-2 py-2.5 font-medium text-slate-900">
-                {{ formatMoney(row.total) }} ر.ي
+                <MoneyAmount :amount="row.total" />
               </td>
             </tr>
           </tbody>
@@ -56,29 +50,33 @@ function formatMoney(value: number): string {
         <div class="flex items-center justify-between">
           <dt class="text-slate-500">إجمالي المشتريات</dt>
           <dd class="font-medium text-slate-900">
-            {{ formatMoney(purchases.totalAmount) }} ر.ي
+            <MoneyAmount :amount="purchases.totalAmount" />
           </dd>
         </div>
         <div class="flex items-center justify-between">
           <dt class="text-slate-500">المدفوع</dt>
           <dd class="font-medium text-emerald-700">
-            {{ formatMoney(purchases.paidAmount) }} ر.ي
+            <MoneyAmount :amount="purchases.paidAmount" />
           </dd>
         </div>
         <div class="flex items-center justify-between">
           <dt class="text-slate-500">المتبقي / الآجل</dt>
           <dd class="font-medium text-amber-700">
-            {{ formatMoney(purchases.unpaidAmount) }} ر.ي
+            <MoneyAmount :amount="purchases.unpaidAmount" />
           </dd>
         </div>
         <div class="mt-2 border-t border-slate-100 pt-2.5">
           <div class="flex items-center justify-between">
             <dt class="text-slate-500">نقداً</dt>
-            <dd class="text-slate-800">{{ formatMoney(purchases.cashTotal) }} ر.ي</dd>
+            <dd class="text-slate-800">
+              <MoneyAmount :amount="purchases.cashTotal" />
+            </dd>
           </div>
           <div class="mt-2 flex items-center justify-between">
             <dt class="text-slate-500">آجل</dt>
-            <dd class="text-slate-800">{{ formatMoney(purchases.creditTotal) }} ر.ي</dd>
+            <dd class="text-slate-800">
+              <MoneyAmount :amount="purchases.creditTotal" />
+            </dd>
           </div>
         </div>
       </dl>

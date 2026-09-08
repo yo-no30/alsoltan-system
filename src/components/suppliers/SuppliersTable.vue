@@ -1,5 +1,6 @@
 ﻿<script setup lang="ts">
 import AppBadge from '@/components/ui/AppBadge.vue'
+import MoneyAmount from '@/components/ui/MoneyAmount.vue'
 import type { Supplier } from '@/types/database.types'
 
 defineProps<{
@@ -11,13 +12,6 @@ const emit = defineEmits<{
   edit: [supplier: Supplier]
   pay: [supplier: Supplier]
 }>()
-
-function formatMoney(value: number): string {
-  return Number(value).toLocaleString('ar-SA', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })
-}
 
 function formatDate(iso: string): string {
   try {
@@ -65,7 +59,7 @@ function formatDate(iso: string): string {
                     : 'text-slate-900'
                 "
               >
-                {{ formatMoney(supplier.balance_due) }} ر.ي
+                <MoneyAmount :amount="Number(supplier.balance_due)" />
               </span>
               <AppBadge
                 v-if="Number(supplier.balance_due) > 0"

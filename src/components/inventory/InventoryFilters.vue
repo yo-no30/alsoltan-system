@@ -1,27 +1,24 @@
 <script setup lang="ts">
 import { Search } from '@lucide/vue'
-import type { Category } from '@/types/database.types'
 
 defineProps<{
   search: string
-  categoryId: string | null
   lowStockOnly: boolean
-  categories: Category[]
+  lowStockCount: number
 }>()
 
 const emit = defineEmits<{
   'update:search': [value: string]
-  'update:categoryId': [value: string | null]
   'update:lowStockOnly': [value: boolean]
 }>()
 
 const fieldClass =
-  'h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none'
+  'h-10 w-full rounded-lg border border-slate-200/70 bg-white px-3 text-sm text-slate-800 shadow-sm transition placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/25'
 </script>
 
 <template>
   <div
-    class="flex shrink-0 flex-col gap-2 rounded-lg border border-slate-200 bg-white p-2.5 sm:flex-row sm:items-center"
+    class="flex shrink-0 flex-col gap-2.5 rounded-xl border border-slate-200/70 bg-white/90 p-2.5 shadow-sm sm:flex-row sm:items-center sm:gap-3"
   >
     <div class="relative min-w-0 flex-1 sm:max-w-sm">
       <Search
@@ -38,29 +35,13 @@ const fieldClass =
       />
     </div>
 
-    <select
-      :value="categoryId ?? ''"
-      class="sm:w-48"
-      :class="fieldClass"
-      @change="
-        emit(
-          'update:categoryId',
-          ($event.target as HTMLSelectElement).value || null,
-        )
-      "
-    >
-      <option value="">كل الأقسام</option>
-      <option v-for="category in categories" :key="category.id" :value="category.id">
-        {{ category.name }}
-      </option>
-    </select>
-
     <label
-      class="inline-flex h-10 cursor-pointer items-center gap-2 whitespace-nowrap px-1 text-sm text-slate-600"
+      class="inline-flex h-10 cursor-pointer items-center gap-2 whitespace-nowrap rounded-lg border border-slate-200/70 bg-slate-50/80 px-3 text-sm text-slate-600 transition hover:bg-slate-100/80"
+      :class="lowStockOnly ? 'border-amber-200 bg-amber-50 text-amber-900' : ''"
     >
       <input
         type="checkbox"
-        class="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-400"
+        class="h-4 w-4 rounded border-slate-300 text-brand-500 focus:ring-brand-500/30"
         :checked="lowStockOnly"
         @change="
           emit(
@@ -70,6 +51,16 @@ const fieldClass =
         "
       />
       مخزون منخفض فقط
+      <span
+        class="inline-flex min-w-5 items-center justify-center rounded-full px-1.5 py-0.5 text-[11px] font-semibold tabular-nums"
+        :class="
+          lowStockCount > 0
+            ? 'bg-amber-500 text-white'
+            : 'bg-slate-200 text-slate-500'
+        "
+      >
+        {{ lowStockCount }}
+      </span>
     </label>
   </div>
 </template>

@@ -74,6 +74,18 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: true, requiresAdmin: true },
   },
   {
+    path: '/accounting',
+    name: 'accounting',
+    component: () => import('@/views/AccountingView.vue'),
+    meta: { requiresAuth: true, requiresAdmin: true },
+  },
+  {
+    path: '/operating-expenses',
+    name: 'operating-expenses',
+    component: () => import('@/views/OperatingExpensesView.vue'),
+    meta: { requiresAuth: true, requiresAdmin: true },
+  },
+  {
     path: '/reports',
     name: 'reports',
     component: () => import('@/views/ReportsView.vue'),

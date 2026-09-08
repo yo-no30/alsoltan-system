@@ -1,6 +1,7 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { LoaderCircle, Trash2 } from '@lucide/vue'
+import MoneyAmount from '@/components/ui/MoneyAmount.vue'
 import { useCartStore } from '@/stores/cart'
 import { useCustomersStore } from '@/stores/customers'
 import type { SalePaymentType } from '@/types/database.types'
@@ -36,13 +37,6 @@ const selectedCustomer = computed(() =>
     ? customersStore.customers.find((entry) => entry.id === customerId.value) ?? null
     : null,
 )
-
-function formatMoney(value: number): string {
-  return value.toLocaleString('ar-SA', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })
-}
 
 function onQuantityInput(productId: string, event: Event): void {
   const input = event.target as HTMLInputElement
@@ -180,8 +174,8 @@ const cellInputClass =
                 @blur="onPriceBlur(line.productId, $event)"
               />
             </td>
-            <td class="px-1 py-1.5 align-middle text-center font-semibold tabular-nums text-slate-900">
-              {{ formatMoney(cart.lineTotal(line.productId)) }}
+            <td class="px-1 py-1.5 align-middle text-center font-semibold text-slate-900">
+              <MoneyAmount :amount="cart.lineTotal(line.productId)" />
             </td>
             <td class="px-1 py-1.5 align-middle text-center">
               <button
@@ -203,7 +197,7 @@ const cellInputClass =
         class="flex items-center justify-between text-xs font-semibold text-slate-900"
       >
         <span>الإجمالي</span>
-        <span class="tabular-nums">{{ formatMoney(cart.totalAmount) }} ر.ي</span>
+        <span><MoneyAmount :amount="cart.totalAmount" /></span>
       </div>
 
       <fieldset class="space-y-1.5">
@@ -261,7 +255,7 @@ const cellInputClass =
           v-if="selectedCustomer && Number(selectedCustomer.balance_due) > 0"
           class="text-[10px] text-slate-600"
         >
-          ذمة سابقة: {{ formatMoney(selectedCustomer.balance_due) }} ر.ي
+          ذمة سابقة: <MoneyAmount :amount="Number(selectedCustomer.balance_due)" />
         </p>
         <p
           v-if="customersStore.customers.length === 0 && !customersStore.isLoading"

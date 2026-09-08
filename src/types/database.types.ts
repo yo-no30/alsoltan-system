@@ -338,12 +338,364 @@ export interface Database {
           },
         ]
       }
+      account_types: {
+        Row: {
+          id: string
+          name: string
+          nature: 'asset' | 'liability' | 'equity' | 'revenue' | 'expense'
+          sort_order: number
+          is_active: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          nature: 'asset' | 'liability' | 'equity' | 'revenue' | 'expense'
+          sort_order?: number
+          is_active?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          nature?: 'asset' | 'liability' | 'equity' | 'revenue' | 'expense'
+          sort_order?: number
+          is_active?: boolean
+          created_at?: string
+        }
+        Relationships: []
+      }
+      accounts: {
+        Row: {
+          id: string
+          code: string
+          name: string
+          type_id: string
+          is_postable: boolean
+          is_active: boolean
+          system_key: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          code: string
+          name: string
+          type_id: string
+          is_postable?: boolean
+          is_active?: boolean
+          system_key?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          code?: string
+          name?: string
+          type_id?: string
+          is_postable?: boolean
+          is_active?: boolean
+          system_key?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'accounts_type_id_fkey'
+            columns: ['type_id']
+            isOneToOne: false
+            referencedRelation: 'account_types'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      journal_entries: {
+        Row: {
+          id: string
+          entry_date: string
+          memo: string
+          source_type:
+            | 'sale'
+            | 'purchase'
+            | 'customer_payment'
+            | 'supplier_payment'
+            | 'expense'
+            | 'payroll'
+            | 'cash_transfer'
+            | 'manual'
+            | 'adjustment'
+            | 'period_close'
+          source_id: string | null
+          created_by: string | null
+          status: 'posted' | 'void'
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          entry_date?: string
+          memo?: string
+          source_type:
+            | 'sale'
+            | 'purchase'
+            | 'customer_payment'
+            | 'supplier_payment'
+            | 'expense'
+            | 'payroll'
+            | 'cash_transfer'
+            | 'manual'
+            | 'adjustment'
+            | 'period_close'
+          source_id?: string | null
+          created_by?: string | null
+          status?: 'posted' | 'void'
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          entry_date?: string
+          memo?: string
+          source_type?:
+            | 'sale'
+            | 'purchase'
+            | 'customer_payment'
+            | 'supplier_payment'
+            | 'expense'
+            | 'payroll'
+            | 'cash_transfer'
+            | 'manual'
+            | 'adjustment'
+            | 'period_close'
+          source_id?: string | null
+          created_by?: string | null
+          status?: 'posted' | 'void'
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'journal_entries_created_by_fkey'
+            columns: ['created_by']
+            isOneToOne: false
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      journal_lines: {
+        Row: {
+          id: string
+          entry_id: string
+          account_id: string
+          amount_alayh: number
+          amount_lahu: number
+          line_memo: string
+        }
+        Insert: {
+          id?: string
+          entry_id: string
+          account_id: string
+          amount_alayh?: number
+          amount_lahu?: number
+          line_memo?: string
+        }
+        Update: {
+          id?: string
+          entry_id?: string
+          account_id?: string
+          amount_alayh?: number
+          amount_lahu?: number
+          line_memo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'journal_lines_entry_id_fkey'
+            columns: ['entry_id']
+            isOneToOne: false
+            referencedRelation: 'journal_entries'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'journal_lines_account_id_fkey'
+            columns: ['account_id']
+            isOneToOne: false
+            referencedRelation: 'accounts'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      operating_expenses: {
+        Row: {
+          id: string
+          expense_date: string
+          account_id: string
+          amount: number
+          pay_from: 'cash' | 'bank'
+          memo: string
+          created_by: string | null
+          journal_entry_id: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          expense_date?: string
+          account_id: string
+          amount: number
+          pay_from: 'cash' | 'bank'
+          memo?: string
+          created_by?: string | null
+          journal_entry_id?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          expense_date?: string
+          account_id?: string
+          amount?: number
+          pay_from?: 'cash' | 'bank'
+          memo?: string
+          created_by?: string | null
+          journal_entry_id?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'operating_expenses_account_id_fkey'
+            columns: ['account_id']
+            isOneToOne: false
+            referencedRelation: 'accounts'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      accounting_periods: {
+        Row: {
+          id: string
+          period_year: number
+          period_month: number
+          status: 'open' | 'closed'
+          closed_by: string | null
+          closed_at: string | null
+          reopened_by: string | null
+          reopened_at: string | null
+          closing_entry_id: string | null
+          close_memo: string
+          reopen_memo: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          period_year: number
+          period_month: number
+          status?: 'open' | 'closed'
+          closed_by?: string | null
+          closed_at?: string | null
+          reopened_by?: string | null
+          reopened_at?: string | null
+          closing_entry_id?: string | null
+          close_memo?: string
+          reopen_memo?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          period_year?: number
+          period_month?: number
+          status?: 'open' | 'closed'
+          closed_by?: string | null
+          closed_at?: string | null
+          reopened_by?: string | null
+          reopened_at?: string | null
+          closing_entry_id?: string | null
+          close_memo?: string
+          reopen_memo?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'accounting_periods_closing_entry_id_fkey'
+            columns: ['closing_entry_id']
+            isOneToOne: false
+            referencedRelation: 'journal_entries'
+            referencedColumns: ['id']
+          },
+        ]
+      }
     }
     Views: Record<string, never>
     Functions: {
       get_auth_role: {
         Args: Record<string, never>
         Returns: string
+      }
+      account_id_by_system_key: {
+        Args: { p_key: string }
+        Returns: string
+      }
+      post_journal_entry: {
+        Args: {
+          p_entry_date: string
+          p_memo: string
+          p_source_type: string
+          p_source_id: string | null
+          p_lines: Json
+          p_created_by?: string | null
+        }
+        Returns: string
+      }
+      create_manual_journal_entry: {
+        Args: {
+          p_entry_date: string
+          p_memo: string
+          p_lines: Json
+        }
+        Returns: string
+      }
+      transfer_cash_to_bank: {
+        Args: {
+          p_amount: number
+          p_memo?: string
+        }
+        Returns: string
+      }
+      record_operating_expense: {
+        Args: {
+          p_expense_date: string
+          p_account_id: string
+          p_amount: number
+          p_pay_from: string
+          p_memo?: string
+        }
+        Returns: Database['public']['Tables']['operating_expenses']['Row']
+      }
+      ensure_period_open: {
+        Args: { p_date: string }
+        Returns: string
+      }
+      close_accounting_period: {
+        Args: {
+          p_year: number
+          p_month: number
+          p_memo?: string
+        }
+        Returns: Database['public']['Tables']['accounting_periods']['Row']
+      }
+      reopen_accounting_period: {
+        Args: {
+          p_year: number
+          p_month: number
+          p_memo: string
+        }
+        Returns: Database['public']['Tables']['accounting_periods']['Row']
+      }
+      record_customer_payment: {
+        Args: {
+          p_customer_id: string
+          p_amount: number
+        }
+        Returns: Database['public']['Tables']['customers']['Row']
+      }
+      record_supplier_payment: {
+        Args: {
+          p_supplier_id: string
+          p_amount: number
+        }
+        Returns: Database['public']['Tables']['suppliers']['Row']
       }
       complete_sale: {
         Args: {
@@ -408,3 +760,34 @@ export type PurchaseUpdate = Database['public']['Tables']['purchases']['Update']
 export type PurchaseItem = Database['public']['Tables']['purchase_items']['Row']
 export type PurchaseItemInsert = Database['public']['Tables']['purchase_items']['Insert']
 export type PurchaseItemUpdate = Database['public']['Tables']['purchase_items']['Update']
+
+export type AccountTypeRow = Database['public']['Tables']['account_types']['Row']
+export type AccountTypeInsert =
+  Database['public']['Tables']['account_types']['Insert']
+export type AccountTypeUpdate =
+  Database['public']['Tables']['account_types']['Update']
+
+export type Account = Database['public']['Tables']['accounts']['Row']
+export type AccountInsert = Database['public']['Tables']['accounts']['Insert']
+export type AccountUpdate = Database['public']['Tables']['accounts']['Update']
+
+export type JournalEntry = Database['public']['Tables']['journal_entries']['Row']
+export type JournalEntryInsert = Database['public']['Tables']['journal_entries']['Insert']
+export type JournalEntryUpdate = Database['public']['Tables']['journal_entries']['Update']
+
+export type JournalLine = Database['public']['Tables']['journal_lines']['Row']
+export type JournalLineInsert = Database['public']['Tables']['journal_lines']['Insert']
+export type JournalLineUpdate = Database['public']['Tables']['journal_lines']['Update']
+
+export type OperatingExpense =
+  Database['public']['Tables']['operating_expenses']['Row']
+export type OperatingExpenseInsert =
+  Database['public']['Tables']['operating_expenses']['Insert']
+export type OperatingExpenseUpdate =
+  Database['public']['Tables']['operating_expenses']['Update']
+
+export type AccountingPeriod = Database['public']['Tables']['accounting_periods']['Row']
+export type AccountingPeriodInsert =
+  Database['public']['Tables']['accounting_periods']['Insert']
+export type AccountingPeriodUpdate =
+  Database['public']['Tables']['accounting_periods']['Update']

@@ -8,6 +8,8 @@ import {
   Users,
   UserCog,
   BarChart3,
+  BookOpen,
+  Receipt,
 } from '@lucide/vue'
 
 export type NavGroup = 'ops' | 'backoffice'
@@ -71,8 +73,24 @@ export const APP_NAV_ITEMS: AppNavItem[] = [
   {
     to: '/users',
     label: 'المستخدمون',
-    description: 'حسابات الموظفين والصلاحيات',
+    description: 'حسابات المستخدمين والصلاحيات',
     icon: UserCog,
+    adminOnly: true,
+    group: 'backoffice',
+  },
+  {
+    to: '/accounting',
+    label: 'المحاسبة',
+    description: 'شجرة الحسابات والقيود والتقارير المالية',
+    icon: BookOpen,
+    adminOnly: true,
+    group: 'backoffice',
+  },
+  {
+    to: '/operating-expenses',
+    label: 'المصاريف التشغيلية',
+    description: 'تسجيل وعرض مصاريف التشغيل من الصندوق أو البنك',
+    icon: Receipt,
     adminOnly: true,
     group: 'backoffice',
   },
@@ -94,6 +112,9 @@ export function filterNavItems(
 }
 
 export function labelForPath(path: string): string {
+  if (path.startsWith('/accounting')) {
+    return 'المحاسبة'
+  }
   const exact = APP_NAV_ITEMS.find((item) => item.to === path)
   if (exact) return exact.label
   const partial = APP_NAV_ITEMS.find(

@@ -155,30 +155,14 @@ export const useCustomersStore = defineStore('customers', () => {
   ): Promise<StoreResult<Customer>> {
     isSaving.value = true
     try {
-      const customer = customers.value.find((entry) => entry.id === customerId)
-      if (!customer) {
-        return { ok: false, message: 'العميل غير موجود.' }
-      }
-
       if (!Number.isFinite(amount) || amount <= 0) {
         return { ok: false, message: 'مبلغ التسديد يجب أن يكون أكبر من صفر.' }
       }
 
-      const balance = Number(customer.balance_due)
-      if (amount > balance) {
-        return {
-          ok: false,
-          message: 'مبلغ التسديد أكبر من رصيد الدين المستحق.',
-        }
-      }
-
-      const nextBalance = roundMoney(balance - amount)
-      const { data, error } = await supabase
-        .from('customers')
-        .update({ balance_due: nextBalance })
-        .eq('id', customerId)
-        .select('*')
-        .single()
+      const { data, error } = await supabase.rpc('record_customer_payment', {
+        p_customer_id: customerId,
+        p_amount: amount,
+      })
 
       if (error || !data) {
         console.error('[customers] payment:', error?.message)

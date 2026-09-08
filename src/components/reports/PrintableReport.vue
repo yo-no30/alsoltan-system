@@ -1,4 +1,5 @@
 ﻿<script setup lang="ts">
+import MoneyAmount from '@/components/ui/MoneyAmount.vue'
 import type {
   PaymentBreakdown,
   PurchaseSummary,
@@ -16,13 +17,6 @@ defineProps<{
   purchases: PurchaseSummary
   topProducts: TopProductRow[]
 }>()
-
-function formatMoney(value: number): string {
-  return value.toLocaleString('ar-SA', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })
-}
 </script>
 
 <template>
@@ -37,15 +31,15 @@ function formatMoney(value: number): string {
     <section class="print-report__kpis">
       <div>
         <span>إجمالي المبيعات</span>
-        <strong>{{ formatMoney(totalRevenue) }} ر.ي</strong>
+        <strong><MoneyAmount :amount="totalRevenue" /></strong>
       </div>
       <div>
         <span>صافي الأرباح</span>
-        <strong>{{ formatMoney(netProfit) }} ر.ي</strong>
+        <strong><MoneyAmount :amount="netProfit" /></strong>
       </div>
       <div>
         <span>ديون الموردين</span>
-        <strong>{{ formatMoney(totalSupplierDebt) }} ر.ي</strong>
+        <strong><MoneyAmount :amount="totalSupplierDebt" /></strong>
       </div>
       <div>
         <span>منتجات منخفضة المخزون</span>
@@ -67,7 +61,7 @@ function formatMoney(value: number): string {
           <tr v-for="row in payments" :key="row.type">
             <td>{{ row.label }}</td>
             <td>{{ row.count }}</td>
-            <td>{{ formatMoney(row.total) }} ر.ي</td>
+            <td><MoneyAmount :amount="row.total" /></td>
           </tr>
         </tbody>
       </table>
@@ -83,15 +77,15 @@ function formatMoney(value: number): string {
           </tr>
           <tr>
             <td>إجمالي المشتريات</td>
-            <td>{{ formatMoney(purchases.totalAmount) }} ر.ي</td>
+            <td><MoneyAmount :amount="purchases.totalAmount" /></td>
           </tr>
           <tr>
             <td>المدفوع</td>
-            <td>{{ formatMoney(purchases.paidAmount) }} ر.ي</td>
+            <td><MoneyAmount :amount="purchases.paidAmount" /></td>
           </tr>
           <tr>
             <td>المتبقي</td>
-            <td>{{ formatMoney(purchases.unpaidAmount) }} ر.ي</td>
+            <td><MoneyAmount :amount="purchases.unpaidAmount" /></td>
           </tr>
         </tbody>
       </table>
@@ -111,7 +105,7 @@ function formatMoney(value: number): string {
           <tr v-for="product in topProducts" :key="product.productId">
             <td>{{ product.name }}</td>
             <td>{{ product.quantity }}</td>
-            <td>{{ formatMoney(product.revenue) }} ر.ي</td>
+            <td><MoneyAmount :amount="product.revenue" /></td>
           </tr>
         </tbody>
       </table>

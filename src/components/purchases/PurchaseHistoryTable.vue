@@ -1,17 +1,11 @@
 ﻿<script setup lang="ts">
 import AppBadge from '@/components/ui/AppBadge.vue'
+import MoneyAmount from '@/components/ui/MoneyAmount.vue'
 import type { PurchaseListItem } from '@/stores/purchases'
 
 defineProps<{
   purchases: PurchaseListItem[]
 }>()
-
-function formatMoney(value: number): string {
-  return Number(value).toLocaleString('ar-SA', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })
-}
 
 function formatDate(iso: string): string {
   try {
@@ -68,10 +62,10 @@ function unpaid(purchase: PurchaseListItem): number {
             {{ purchase.supplier_name || '—' }}
           </td>
           <td class="px-3 py-2 text-slate-900">
-            {{ formatMoney(purchase.total_amount) }} ر.ي
+            <MoneyAmount :amount="Number(purchase.total_amount)" />
           </td>
           <td class="px-3 py-2 text-slate-700">
-            {{ formatMoney(purchase.paid_amount) }} ر.ي
+            <MoneyAmount :amount="Number(purchase.paid_amount)" />
           </td>
           <td class="px-3 py-2">
             <AppBadge :variant="purchase.payment_type === 'cash' ? 'success' : 'warning'">
@@ -80,7 +74,7 @@ function unpaid(purchase: PurchaseListItem): number {
           </td>
           <td class="px-3 py-2">
             <AppBadge v-if="unpaid(purchase) > 0" variant="warning">
-              متبقي {{ formatMoney(unpaid(purchase)) }}
+              متبقي <MoneyAmount :amount="unpaid(purchase)" />
             </AppBadge>
             <AppBadge v-else variant="muted">مسدد</AppBadge>
           </td>

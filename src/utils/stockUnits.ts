@@ -65,3 +65,30 @@ export function formatStockLabel(
 
   return `${cartons} كرتون و ${pieces} قطعة`
 }
+
+/** Compact stock label for dense tables, e.g. "4 ك و 18 ق". */
+export function formatStockLabelShort(
+  totalPieces: number,
+  piecesPerCarton: number | null | undefined,
+): string {
+  const {
+    cartons,
+    pieces,
+    totalPieces: total,
+    piecesPerCarton: ppc,
+  } = splitStock(totalPieces, piecesPerCarton)
+
+  if (ppc <= 1) {
+    return `${total} ق`
+  }
+
+  if (cartons === 0) {
+    return `${pieces} ق`
+  }
+
+  if (pieces === 0) {
+    return `${cartons} ك`
+  }
+
+  return `${cartons} ك و ${pieces} ق`
+}
