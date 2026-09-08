@@ -1,18 +1,22 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { RouterLink, useRouter } from 'vue-router'
-import { LogOut, Menu } from '@lucide/vue'
+import { computed, ref } from 'vue'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
+import { ChevronLeft, LogOut, Menu } from '@lucide/vue'
 import { useAuthStore } from '@/stores/auth'
 import { useOnlineStatus } from '@/composables/useOnlineStatus'
 import { useToast } from '@/stores/toast'
 import { useUiStore } from '@/stores/ui'
+import { breadcrumbsForPath } from '@/navigation/appNav'
 
 const auth = useAuthStore()
 const ui = useUiStore()
 const toast = useToast()
+const route = useRoute()
 const router = useRouter()
 const { isOnline } = useOnlineStatus()
 const isLoggingOut = ref(false)
+
+const crumbs = computed(() => breadcrumbsForPath(route.path))
 
 async function handleLogout(): Promise<void> {
   if (isLoggingOut.value) return
@@ -36,27 +40,55 @@ async function handleLogout(): Promise<void> {
 
 <template>
   <header
-    class="flex h-11 shrink-0 items-center justify-between border-b border-slate-200/70 bg-white px-2.5 shadow-sm sm:px-3"
+    class="flex min-h-11 shrink-0 items-center justify-between gap-3 border-b border-slate-200/70 bg-white px-2.5 py-1.5 shadow-sm sm:px-3"
   >
-    <div class="flex items-center gap-1.5 sm:gap-2">
+    <div class="flex min-w-0 items-center gap-1.5 sm:gap-2">
       <button
         type="button"
-        class="inline-flex rounded-md border border-slate-200/70 p-1.5 text-slate-600 transition hover:bg-slate-50 lg:hidden"
+        class="inline-flex shrink-0 rounded-md border border-slate-200/70 p-1.5 text-slate-600 transition hover:bg-slate-50 lg:hidden"
         aria-label="فتح القائمة"
         @click="ui.toggleMobileNav()"
       >
         <Menu class="h-3.5 w-3.5" :stroke-width="1.75" />
       </button>
 
-      <RouterLink
-        to="/pos"
-        class="max-w-[8.5rem] truncate text-sm font-semibold tracking-tight text-brand-500 xs:max-w-[11rem] sm:max-w-none"
-      >
-        مشروبات السلطان
-      </RouterLink>
+      <div class="min-w-0">
+        <RouterLink
+          to="/home"
+          class="block truncate text-sm font-semibold tracking-tight text-brand-500"
+        >
+          مشروبات السلطان
+        </RouterLink>
+        <nav
+          class="mt-0.5 flex min-w-0 items-center gap-0.5 text-[11px] text-slate-500"
+          aria-label="مسار الصفحة"
+        >
+          <template v-for="(crumb, index) in crumbs" :key="`${crumb.label}-${index}`">
+            <ChevronLeft
+              v-if="index > 0"
+              class="h-3 w-3 shrink-0 text-slate-300"
+              :stroke-width="2"
+            />
+            <RouterLink
+              v-if="crumb.to"
+              :to="crumb.to"
+              class="truncate transition hover:text-slate-800"
+            >
+              {{ crumb.label }}
+            </RouterLink>
+            <span
+              v-else
+              class="truncate font-medium text-slate-700"
+              aria-current="page"
+            >
+              {{ crumb.label }}
+            </span>
+          </template>
+        </nav>
+      </div>
     </div>
 
-    <div class="flex items-center gap-1.5 text-xs sm:gap-2">
+    <div class="flex shrink-0 items-center gap-1.5 text-xs sm:gap-2">
       <span
         class="inline-flex items-center gap-1 rounded-md border border-slate-200/70 bg-slate-50 px-2 py-0.5 text-slate-600"
         :title="isOnline ? 'متصل' : 'غير متصل'"

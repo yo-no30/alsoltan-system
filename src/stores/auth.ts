@@ -20,8 +20,8 @@ function mapAuthError(message: string): string {
   return 'تعذر تسجيل الدخول. حاول مرة أخرى.'
 }
 
-export function homePathForRole(role: UserRole | null | undefined): string {
-  return role === 'admin' ? '/reports' : '/pos'
+export function homePathForRole(_role: UserRole | null | undefined): string {
+  return '/home'
 }
 
 export const useAuthStore = defineStore('auth', () => {

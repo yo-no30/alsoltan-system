@@ -1,86 +1,16 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, type Component } from 'vue'
+import { computed, onMounted, onUnmounted } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
-import {
-  ShoppingCart,
-  Package,
-  FileText,
-  Handshake,
-  Users,
-  UserCog,
-  BarChart3,
-  PanelRightClose,
-  PanelRightOpen,
-} from '@lucide/vue'
+import { PanelRightClose, PanelRightOpen } from '@lucide/vue'
 import { useAuthStore } from '@/stores/auth'
 import { useUiStore } from '@/stores/ui'
-
-interface NavItem {
-  to: string
-  label: string
-  icon: Component
-  adminOnly?: boolean
-  group: 'ops' | 'backoffice'
-}
+import { APP_NAV_ITEMS, filterNavItems } from '@/navigation/appNav'
 
 const route = useRoute()
 const auth = useAuthStore()
 const ui = useUiStore()
 
-const navItems = computed<NavItem[]>(() => {
-  const items: NavItem[] = [
-    {
-      to: '/pos',
-      label: 'نقطة البيع',
-      icon: ShoppingCart,
-      group: 'ops',
-    },
-    {
-      to: '/inventory',
-      label: 'المنتجات والمخزون',
-      icon: Package,
-      adminOnly: true,
-      group: 'backoffice',
-    },
-    {
-      to: '/purchases',
-      label: 'المشتريات',
-      icon: FileText,
-      adminOnly: true,
-      group: 'backoffice',
-    },
-    {
-      to: '/suppliers',
-      label: 'الموردين',
-      icon: Handshake,
-      adminOnly: true,
-      group: 'backoffice',
-    },
-    {
-      to: '/customers',
-      label: 'العملاء',
-      icon: Users,
-      adminOnly: true,
-      group: 'backoffice',
-    },
-    {
-      to: '/users',
-      label: 'المستخدمون',
-      icon: UserCog,
-      adminOnly: true,
-      group: 'backoffice',
-    },
-    {
-      to: '/reports',
-      label: 'التقارير والأرباح',
-      icon: BarChart3,
-      adminOnly: true,
-      group: 'backoffice',
-    },
-  ]
-
-  return items.filter((item) => !item.adminOnly || auth.isAdmin)
-})
+const navItems = computed(() => filterNavItems(APP_NAV_ITEMS, auth.isAdmin))
 
 const opsItems = computed(() =>
   navItems.value.filter((item) => item.group === 'ops'),
@@ -90,6 +20,9 @@ const backofficeItems = computed(() =>
 )
 
 function isActive(path: string): boolean {
+  if (path === '/home') {
+    return route.path === '/home'
+  }
   return route.path === path || route.path.startsWith(`${path}/`)
 }
 

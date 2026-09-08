@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { Plus, FolderTree, RefreshCw } from '@lucide/vue'
+import { Plus, FolderTree, RefreshCw, Package, AlertTriangle, Ban } from '@lucide/vue'
 import InventoryFilters from '@/components/inventory/InventoryFilters.vue'
 import InventoryTable from '@/components/inventory/InventoryTable.vue'
 import ProductFormModal from '@/components/inventory/ProductFormModal.vue'
@@ -35,6 +35,16 @@ const filteredProducts = computed(() => {
     if (!query) return true
     return product.name.toLowerCase().includes(query)
   })
+})
+
+const stats = computed(() => {
+  const all = inventory.products
+  return {
+    total: all.length,
+    lowStock: all.filter((p) => p.stock_quantity <= p.min_stock_alert).length,
+    inactive: all.filter((p) => !p.is_active).length,
+    shown: filteredProducts.value.length,
+  }
 })
 
 async function load(): Promise<void> {
@@ -151,28 +161,37 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="mx-auto flex w-full max-w-7xl flex-col gap-3">
-    <header class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <div>
-        <h1 class="text-xl font-semibold tracking-tight text-slate-900">
-          المنتجات والمخزون
-        </h1>
-        <p class="mt-1 text-sm text-slate-500">
-          إدارة الأصناف والكميات وحدود التنبيه
+  <div class="flex min-h-0 flex-1 flex-col gap-3">
+    <header
+      class="flex shrink-0 flex-col gap-3 border-b border-slate-200 pb-3 sm:flex-row sm:items-center sm:justify-between"
+    >
+      <div class="min-w-0">
+        <h1 class="text-base font-semibold text-slate-900">المنتجات والمخزون</h1>
+        <p class="mt-1 text-xs text-slate-500">
+          عرض
+          <span class="font-medium text-slate-700">{{ stats.shown }}</span>
+          من
+          <span class="font-medium text-slate-700">{{ stats.total }}</span>
+          منتج
         </p>
       </div>
-      <div class="flex flex-wrap gap-2">
+      <div class="flex flex-wrap items-center gap-2">
         <button
           type="button"
-          class="inline-flex items-center gap-1.5 rounded-xl border border-slate-200/70 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
+          class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+          :disabled="inventory.isLoading"
           @click="load"
         >
-          <RefreshCw class="h-4 w-4" :stroke-width="1.75" />
+          <RefreshCw
+            class="h-4 w-4"
+            :class="inventory.isLoading ? 'animate-spin' : ''"
+            :stroke-width="1.75"
+          />
           تحديث
         </button>
         <button
           type="button"
-          class="inline-flex items-center gap-1.5 rounded-xl border border-slate-200/70 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
+          class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50"
           @click="categoryModalOpen = true"
         >
           <FolderTree class="h-4 w-4" :stroke-width="1.75" />
@@ -180,14 +199,44 @@ onMounted(() => {
         </button>
         <button
           type="button"
-          class="inline-flex items-center gap-1.5 rounded-xl bg-brand-500 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-brand-600"
+          class="inline-flex items-center gap-1.5 rounded-lg bg-brand-500 px-3 py-2 text-xs font-semibold text-white hover:bg-brand-600"
           @click="openCreateProduct"
         >
           <Plus class="h-4 w-4" :stroke-width="2" />
-          إضافة منتج
+          منتج جديد
         </button>
       </div>
     </header>
+
+    <div class="grid shrink-0 grid-cols-3 gap-2">
+      <div class="rounded-lg border border-slate-200 bg-white px-3 py-2.5">
+        <div class="flex items-center gap-1.5 text-xs text-slate-500">
+          <Package class="h-3.5 w-3.5" :stroke-width="1.75" />
+          الإجمالي
+        </div>
+        <p class="mt-1 text-lg font-semibold tabular-nums text-slate-900">
+          {{ stats.total }}
+        </p>
+      </div>
+      <div class="rounded-lg border border-slate-200 bg-white px-3 py-2.5">
+        <div class="flex items-center gap-1.5 text-xs text-slate-500">
+          <AlertTriangle class="h-3.5 w-3.5" :stroke-width="1.75" />
+          مخزون منخفض
+        </div>
+        <p class="mt-1 text-lg font-semibold tabular-nums text-slate-900">
+          {{ stats.lowStock }}
+        </p>
+      </div>
+      <div class="rounded-lg border border-slate-200 bg-white px-3 py-2.5">
+        <div class="flex items-center gap-1.5 text-xs text-slate-500">
+          <Ban class="h-3.5 w-3.5" :stroke-width="1.75" />
+          موقوف
+        </div>
+        <p class="mt-1 text-lg font-semibold tabular-nums text-slate-900">
+          {{ stats.inactive }}
+        </p>
+      </div>
+    </div>
 
     <InventoryFilters
       v-model:search="search"
@@ -196,21 +245,23 @@ onMounted(() => {
       :categories="inventory.categories"
     />
 
-    <div
-      v-if="inventory.isLoading"
-      class="rounded-2xl border border-slate-200/70 bg-white p-10 text-center text-sm text-slate-400 shadow-sm"
-    >
-      جاري تحميل المخزون...
+    <div class="min-h-0 flex-1 overflow-hidden">
+      <div
+        v-if="inventory.isLoading"
+        class="flex h-48 items-center justify-center rounded-lg border border-slate-200 bg-white text-sm text-slate-400"
+      >
+        جاري تحميل المخزون...
+      </div>
+      <InventoryTable
+        v-else
+        :products="filteredProducts"
+        :category-name="inventory.categoryName"
+        :is-busy="inventory.isSaving"
+        @edit="openEditProduct"
+        @adjust-stock="openStock"
+        @toggle-active="onToggleActive"
+      />
     </div>
-    <InventoryTable
-      v-else
-      :products="filteredProducts"
-      :category-name="inventory.categoryName"
-      :is-busy="inventory.isSaving"
-      @edit="openEditProduct"
-      @adjust-stock="openStock"
-      @toggle-active="onToggleActive"
-    />
 
     <ProductFormModal
       :open="productModalOpen"

@@ -29,7 +29,13 @@ const routes: RouteRecordRaw[] = [
   },
   {
     path: '/',
-    redirect: '/pos',
+    redirect: '/home',
+  },
+  {
+    path: '/home',
+    name: 'home',
+    component: () => import('@/views/HomeView.vue'),
+    meta: { requiresAuth: true },
   },
   {
     path: '/pos',
@@ -107,7 +113,7 @@ router.beforeEach(async (to: RouteLocationNormalized) => {
   if (to.meta.requiresAdmin && !auth.isAdmin) {
     const toast = useToast()
     toast.warning('ليس لديك صلاحية للوصول إلى هذه الصفحة')
-    return '/pos'
+    return '/home'
   }
 
   return true

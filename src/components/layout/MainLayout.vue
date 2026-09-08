@@ -15,7 +15,7 @@ import AppSidebar from '@/components/layout/AppSidebar.vue'
       <AppHeader />
       <div class="app-workspace flex min-h-0 min-w-0 flex-1 flex-col">
         <main
-          class="flex min-h-0 min-w-0 flex-1 flex-col overflow-auto p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:p-4"
+          class="flex min-h-0 min-w-0 flex-1 flex-col overflow-auto p-1 pb-[max(0.25rem,env(safe-area-inset-bottom))]"
         >
           <slot />
         </main>

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Search } from '@lucide/vue'
 import type { Category } from '@/types/database.types'
 
 defineProps<{
@@ -13,21 +14,34 @@ const emit = defineEmits<{
   'update:categoryId': [value: string | null]
   'update:lowStockOnly': [value: boolean]
 }>()
+
+const fieldClass =
+  'h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none'
 </script>
 
 <template>
-  <div class="flex flex-col gap-3 lg:flex-row lg:items-center">
-    <input
-      :value="search"
-      type="search"
-      class="w-full rounded-xl border border-slate-200/70 bg-white px-3.5 py-2.5 text-sm shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/25 lg:max-w-xs"
-      placeholder="بحث بالاسم..."
-      @input="emit('update:search', ($event.target as HTMLInputElement).value)"
-    />
+  <div
+    class="flex shrink-0 flex-col gap-2 rounded-lg border border-slate-200 bg-white p-2.5 sm:flex-row sm:items-center"
+  >
+    <div class="relative min-w-0 flex-1 sm:max-w-sm">
+      <Search
+        class="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+        :stroke-width="1.75"
+      />
+      <input
+        :value="search"
+        type="search"
+        class="ps-9"
+        :class="fieldClass"
+        placeholder="بحث عن منتج..."
+        @input="emit('update:search', ($event.target as HTMLInputElement).value)"
+      />
+    </div>
 
     <select
       :value="categoryId ?? ''"
-      class="w-full rounded-xl border border-slate-200/70 bg-white px-3.5 py-2.5 text-sm shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/25 lg:max-w-[14rem]"
+      class="sm:w-48"
+      :class="fieldClass"
       @change="
         emit(
           'update:categoryId',
@@ -42,11 +56,11 @@ const emit = defineEmits<{
     </select>
 
     <label
-      class="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200/70 bg-white px-3.5 py-2.5 text-sm text-slate-700 shadow-sm"
+      class="inline-flex h-10 cursor-pointer items-center gap-2 whitespace-nowrap px-1 text-sm text-slate-600"
     >
       <input
         type="checkbox"
-        class="rounded border-slate-300 text-brand-500 focus:ring-brand-500"
+        class="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-400"
         :checked="lowStockOnly"
         @change="
           emit(

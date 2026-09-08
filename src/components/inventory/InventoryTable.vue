@@ -1,5 +1,4 @@
-<script setup lang="ts">
-import AppBadge from '@/components/ui/AppBadge.vue'
+﻿<script setup lang="ts">
 import { formatStockLabel } from '@/utils/stockUnits'
 import type { Product } from '@/types/database.types'
 
@@ -17,7 +16,7 @@ const emit = defineEmits<{
 
 function formatMoney(value: number): string {
   return Number(value).toLocaleString('ar-SA', {
-    minimumFractionDigits: 2,
+    minimumFractionDigits: 0,
     maximumFractionDigits: 2,
   })
 }
@@ -32,101 +31,118 @@ function stockLabel(product: Product): string {
 </script>
 
 <template>
-  <div class="overflow-x-auto rounded-2xl border border-slate-200/70 bg-white shadow-sm">
-    <table class="min-w-[64rem] text-sm">
-      <thead class="border-b border-slate-200/70 bg-slate-50/80 text-slate-600">
-        <tr>
-          <th class="px-3 py-2 text-start font-medium">الصورة</th>
-          <th class="px-3 py-2 text-start font-medium">المنتج</th>
-          <th class="px-3 py-2 text-start font-medium">القسم</th>
-          <th class="px-3 py-2 text-start font-medium">سعر البيع</th>
-          <th class="px-3 py-2 text-start font-medium">سعر التكلفة</th>
-          <th class="px-3 py-2 text-start font-medium">المخزون</th>
-          <th class="px-3 py-2 text-start font-medium">قطعة/كرتون</th>
-          <th class="px-3 py-2 text-start font-medium">حد التنبيه</th>
-          <th class="px-3 py-2 text-start font-medium">الحالة</th>
-          <th class="px-3 py-2 text-start font-medium">إجراءات</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-if="products.length === 0">
-          <td colspan="10" class="px-4 py-10 text-center text-slate-400">
-            لا توجد منتجات مطابقة
-          </td>
-        </tr>
-        <tr
-          v-for="product in products"
-          :key="product.id"
-          class="border-b border-slate-100 last:border-0"
-        >
-          <td class="px-3 py-2">
-            <div
-              class="flex h-11 w-11 overflow-hidden rounded-lg border border-slate-200/70 bg-slate-50"
-            >
-              <img
-                v-if="product.image_url"
-                :src="product.image_url"
-                :alt="product.name"
-                class="h-full w-full object-cover"
-                loading="lazy"
-              />
-            </div>
-          </td>
-          <td class="px-3 py-2 font-medium text-slate-900">
-            <div class="flex flex-wrap items-center gap-2">
-              <span>{{ product.name }}</span>
-              <AppBadge v-if="isLowStock(product)" variant="warning">
-                مخزون منخفض
-              </AppBadge>
-            </div>
-          </td>
-          <td class="px-3 py-2 text-slate-600">
-            {{ categoryName(product.category_id) }}
-          </td>
-          <td class="px-3 py-2 text-slate-900">{{ formatMoney(product.price) }}</td>
-          <td class="px-3 py-2 text-slate-900">{{ formatMoney(product.cost_price) }}</td>
-          <td class="px-3 py-2">
-            <div class="font-semibold text-slate-900">{{ stockLabel(product) }}</div>
-            <div class="text-[11px] text-slate-500">
-              {{ product.stock_quantity }} قطعة إجمالاً
-            </div>
-          </td>
-          <td class="px-3 py-2 text-slate-600">{{ product.pieces_per_carton }}</td>
-          <td class="px-3 py-2 text-slate-600">{{ product.min_stock_alert }} قطعة</td>
-          <td class="px-3 py-2">
-            <button
-              type="button"
-              class="disabled:opacity-60"
-              :disabled="isBusy"
-              @click="emit('toggleActive', product)"
-            >
-              <AppBadge :variant="product.is_active ? 'success' : 'muted'">
+  <div class="flex h-full min-h-0 flex-col overflow-hidden rounded-lg border border-slate-200 bg-white">
+    <div class="min-h-0 flex-1 overflow-auto">
+      <table class="w-full min-w-[56rem] border-collapse text-sm">
+        <thead class="sticky top-0 z-10 bg-slate-50 text-xs text-slate-500">
+          <tr class="border-b border-slate-200">
+            <th class="w-12 px-3 py-2.5 text-start font-medium" />
+            <th class="px-3 py-2.5 text-start font-medium">المنتج</th>
+            <th class="px-3 py-2.5 text-start font-medium">القسم</th>
+            <th class="px-3 py-2.5 text-end font-medium">سعر البيع</th>
+            <th class="px-3 py-2.5 text-end font-medium">التكلفة</th>
+            <th class="px-3 py-2.5 text-start font-medium">المخزون</th>
+            <th class="px-3 py-2.5 text-center font-medium">ق/ك</th>
+            <th class="px-3 py-2.5 text-center font-medium">التنبيه</th>
+            <th class="px-3 py-2.5 text-center font-medium">الحالة</th>
+            <th class="px-3 py-2.5 text-end font-medium">إجراءات</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-if="products.length === 0">
+            <td colspan="10" class="px-4 py-16 text-center text-slate-400">
+              لا توجد منتجات مطابقة للبحث أو التصفية
+            </td>
+          </tr>
+          <tr
+            v-for="product in products"
+            :key="product.id"
+            class="border-b border-slate-100 transition hover:bg-slate-50/80 last:border-0"
+          >
+            <td class="px-3 py-2.5 align-middle">
+              <div
+                class="flex h-10 w-10 overflow-hidden rounded-md border border-slate-200 bg-slate-50"
+              >
+                <img
+                  v-if="product.image_url"
+                  :src="product.image_url"
+                  :alt="product.name"
+                  class="h-full w-full object-cover"
+                  loading="lazy"
+                />
+              </div>
+            </td>
+            <td class="px-3 py-2.5 align-middle">
+              <div class="min-w-0">
+                <p class="truncate font-medium text-slate-900">{{ product.name }}</p>
+                <p
+                  v-if="isLowStock(product)"
+                  class="mt-0.5 text-xs font-medium text-amber-700"
+                >
+                  مخزون منخفض
+                </p>
+              </div>
+            </td>
+            <td class="px-3 py-2.5 align-middle text-slate-600">
+              {{ categoryName(product.category_id) || '—' }}
+            </td>
+            <td class="px-3 py-2.5 align-middle text-end tabular-nums text-slate-900">
+              {{ formatMoney(product.price) }}
+            </td>
+            <td class="px-3 py-2.5 align-middle text-end tabular-nums text-slate-600">
+              {{ formatMoney(product.cost_price) }}
+            </td>
+            <td class="px-3 py-2.5 align-middle">
+              <p class="font-medium text-slate-900">{{ stockLabel(product) }}</p>
+              <p class="text-xs tabular-nums text-slate-400">
+                {{ product.stock_quantity }} قطعة
+              </p>
+            </td>
+            <td class="px-3 py-2.5 align-middle text-center tabular-nums text-slate-600">
+              {{ product.pieces_per_carton }}
+            </td>
+            <td class="px-3 py-2.5 align-middle text-center tabular-nums text-slate-600">
+              {{ product.min_stock_alert }}
+            </td>
+            <td class="px-3 py-2.5 align-middle text-center">
+              <button
+                type="button"
+                class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium transition disabled:opacity-60"
+                :class="
+                  product.is_active
+                    ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                    : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+                "
+                :disabled="isBusy"
+                :title="product.is_active ? 'إيقاف المنتج' : 'تفعيل المنتج'"
+                @click="emit('toggleActive', product)"
+              >
                 {{ product.is_active ? 'نشط' : 'موقوف' }}
-              </AppBadge>
-            </button>
-          </td>
-          <td class="px-3 py-2">
-            <div class="flex flex-wrap gap-2">
-              <button
-                type="button"
-                class="rounded-lg border border-slate-200/70 px-2.5 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-50"
-                :disabled="isBusy"
-                @click="emit('edit', product)"
-              >
-                تعديل
               </button>
-              <button
-                type="button"
-                class="rounded-lg border border-slate-200/70 px-2.5 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-50"
-                :disabled="isBusy"
-                @click="emit('adjustStock', product)"
-              >
-                مخزون
-              </button>
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+            </td>
+            <td class="px-3 py-2.5 align-middle">
+              <div class="flex items-center justify-end gap-3">
+                <button
+                  type="button"
+                  class="text-xs font-medium text-slate-600 underline-offset-2 hover:text-slate-900 hover:underline disabled:opacity-60"
+                  :disabled="isBusy"
+                  @click="emit('edit', product)"
+                >
+                  تعديل
+                </button>
+                <button
+                  type="button"
+                  class="text-xs font-medium text-slate-600 underline-offset-2 hover:text-slate-900 hover:underline disabled:opacity-60"
+                  :disabled="isBusy"
+                  @click="emit('adjustStock', product)"
+                >
+                  مخزون
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </template>
