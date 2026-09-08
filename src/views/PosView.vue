@@ -13,6 +13,7 @@ import { useInventoryStore } from '@/stores/inventory'
 import { useOfflineQueueStore } from '@/stores/offlineQueue'
 import { useToast } from '@/stores/toast'
 import type { Product, SalePaymentType } from '@/types/database.types'
+import { formatStockLabel } from '@/utils/stockUnits'
 
 const cart = useCartStore()
 const inventory = useInventoryStore()
@@ -55,7 +56,9 @@ function addProduct(product: Product): void {
   const existing = cart.lines.find((line) => line.productId === product.id)
   const nextQty = (existing?.quantity ?? 0) + 1
   if (nextQty > product.stock_quantity) {
-    toast.warning(`المخزون المتاح لـ ${product.name}: ${product.stock_quantity}`)
+    toast.warning(
+      `المخزون المتاح لـ ${product.name}: ${formatStockLabel(product.stock_quantity, product.pieces_per_carton)}`,
+    )
     return
   }
 
@@ -93,9 +96,9 @@ onMounted(async () => {
 
 <template>
   <div class="pos-screen flex min-h-0 flex-1 flex-col gap-3 lg:flex-row" dir="rtl">
-    <!-- Cart first on mobile so checkout is reachable; on lg+ products stay on the right in RTL -->
     <div
-      class="order-1 flex w-full shrink-0 flex-col lg:order-2 lg:w-[19rem] xl:w-[20rem]"
+      v-if="cart.lines.length > 0"
+      class="order-1 flex w-full shrink-0 flex-col lg:order-2 lg:w-[22rem] xl:w-[24rem]"
     >
       <div
         v-if="offlineQueue.queueLength > 0"
@@ -110,6 +113,17 @@ onMounted(async () => {
           @checkout="onCheckout"
           @focus-search="focusSearch"
         />
+      </div>
+    </div>
+
+    <div
+      v-else-if="offlineQueue.queueLength > 0"
+      class="order-1 w-full shrink-0 lg:order-2 lg:w-[22rem] xl:w-[24rem]"
+    >
+      <div
+        class="rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-1.5 text-[11px] text-amber-800"
+      >
+        فواتير بانتظار المزامنة: {{ offlineQueue.queueLength }}
       </div>
     </div>
 
@@ -138,6 +152,7 @@ onMounted(async () => {
         <ProductGrid
           :products="filteredProducts"
           :is-loading="inventory.isLoading"
+          :invoice-open="cart.lines.length > 0"
           @add="addProduct"
         />
       </div>

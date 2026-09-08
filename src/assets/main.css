@@ -52,6 +52,17 @@
   }
 }
 
+/*
+  Desktop page content density ≈ browser zoom 75%.
+  Sidebar + top header stay at 100% for consistent chrome.
+  Leave the browser zoom at 100% for the intended layout.
+*/
+@media (min-width: 1024px) {
+  .app-workspace {
+    zoom: 0.75;
+  }
+}
+
 /* Avoid GPU crashes on Windows when native dialogs / image decode run under blur layers. */
 html.modal-open [class*='backdrop-blur'] {
   -webkit-backdrop-filter: none !important;

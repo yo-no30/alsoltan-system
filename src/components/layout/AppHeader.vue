@@ -36,7 +36,7 @@ async function handleLogout(): Promise<void> {
 
 <template>
   <header
-    class="flex h-11 shrink-0 items-center justify-between border-b border-slate-200/70 bg-white/85 px-2.5 backdrop-blur-md sm:px-3"
+    class="flex h-11 shrink-0 items-center justify-between border-b border-slate-200/70 bg-white px-2.5 shadow-sm sm:px-3"
   >
     <div class="flex items-center gap-1.5 sm:gap-2">
       <button
@@ -54,7 +54,6 @@ async function handleLogout(): Promise<void> {
       >
         مشروبات السلطان
       </RouterLink>
-      <span class="hidden text-xs text-slate-500 sm:inline">Sultan Beverages</span>
     </div>
 
     <div class="flex items-center gap-1.5 text-xs sm:gap-2">

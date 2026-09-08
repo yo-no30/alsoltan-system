@@ -120,7 +120,7 @@ onUnmounted(() => {
   />
 
   <aside
-    class="app-sidebar fixed inset-y-0 z-50 flex flex-col border-slate-200/70 bg-white/85 backdrop-blur-md transition-[width,transform] duration-300 ease-out lg:static lg:z-auto"
+    class="app-sidebar fixed inset-y-0 z-50 flex flex-col border-slate-200/70 bg-white shadow-sm transition-[width,transform] duration-300 ease-out lg:static lg:z-auto"
     :class="[
       ui.sidebarWidthClass,
       ui.mobileNavOpen
@@ -130,16 +130,12 @@ onUnmounted(() => {
     ]"
   >
     <div
-      class="flex h-11 shrink-0 items-center border-b border-slate-200/70 px-2"
-      :class="ui.showSidebarLabels ? 'gap-2' : 'justify-center lg:justify-center'"
+      class="flex h-11 shrink-0 items-center justify-end border-b border-slate-200/70 px-2"
     >
       <div
         class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-brand-500 text-[11px] font-bold text-white"
       >
         س
-      </div>
-      <div v-if="ui.showSidebarLabels" class="min-w-0">
-        <p class="truncate text-xs font-semibold text-slate-900">السلطان</p>
       </div>
     </div>
 

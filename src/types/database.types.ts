@@ -76,6 +76,7 @@ export interface Database {
           category_id: string | null
           stock_quantity: number
           min_stock_alert: number
+          pieces_per_carton: number
           is_active: boolean
           image_url: string | null
           created_at: string
@@ -88,6 +89,7 @@ export interface Database {
           category_id?: string | null
           stock_quantity?: number
           min_stock_alert?: number
+          pieces_per_carton?: number
           is_active?: boolean
           image_url?: string | null
           created_at?: string
@@ -100,6 +102,7 @@ export interface Database {
           category_id?: string | null
           stock_quantity?: number
           min_stock_alert?: number
+          pieces_per_carton?: number
           is_active?: boolean
           image_url?: string | null
           created_at?: string

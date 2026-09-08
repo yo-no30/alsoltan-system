@@ -16,8 +16,9 @@ export const useUiStore = defineStore('ui', () => {
   const mobileNavOpen = ref(false)
 
   const sidebarWidthClass = computed(() =>
-    // Mobile drawer always full label width; desktop respects collapse
-    sidebarCollapsed.value ? 'w-64 lg:w-12' : 'w-64 lg:w-44',
+    // Mobile drawer always full label width; desktop respects collapse.
+    // Fixed rem widths so the sidebar stays readable while workspace is denser.
+    sidebarCollapsed.value ? 'w-64 lg:w-14' : 'w-64 lg:w-52',
   )
 
   const showSidebarLabels = computed(

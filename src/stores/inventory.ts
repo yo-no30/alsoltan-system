@@ -5,9 +5,8 @@ import {
   PRODUCT_IMAGES_BUCKET,
   buildProductImagePath,
   publicUrlForPath,
-  resolveImageMime,
   storagePathFromPublicUrl,
-  validateProductImage,
+  validateProductImageFile,
 } from '@/utils/productImage'
 import type {
   Category,
@@ -202,6 +201,11 @@ export const useInventoryStore = defineStore('inventory', () => {
         return { ok: false, message: 'الأسعار يجب أن تكون صفر أو أكثر.' }
       }
 
+      const piecesPerCarton = Math.max(
+        1,
+        Math.floor(payload.pieces_per_carton ?? 1),
+      )
+
       const insertPayload: ProductInsert = {
         name,
         price: payload.price,
@@ -209,7 +213,9 @@ export const useInventoryStore = defineStore('inventory', () => {
         category_id: payload.category_id ?? null,
         stock_quantity: payload.stock_quantity ?? 0,
         min_stock_alert: payload.min_stock_alert ?? 5,
+        pieces_per_carton: piecesPerCarton,
         is_active: payload.is_active ?? true,
+        image_url: payload.image_url ?? null,
       }
 
       if ((insertPayload.stock_quantity ?? 0) < 0 || (insertPayload.min_stock_alert ?? 0) < 0) {
@@ -253,14 +259,19 @@ export const useInventoryStore = defineStore('inventory', () => {
         (payload.price !== undefined && payload.price < 0) ||
         (payload.cost_price !== undefined && payload.cost_price < 0) ||
         (payload.stock_quantity !== undefined && payload.stock_quantity < 0) ||
-        (payload.min_stock_alert !== undefined && payload.min_stock_alert < 0)
+        (payload.min_stock_alert !== undefined && payload.min_stock_alert < 0) ||
+        (payload.pieces_per_carton !== undefined && payload.pieces_per_carton < 1)
       ) {
-        return { ok: false, message: 'القيم الرقمية يجب أن تكون صفر أو أكثر.' }
+        return { ok: false, message: 'القيم الرقمية غير صالحة.' }
       }
 
       const updatePayload: ProductUpdate = {
         ...payload,
         name: payload.name?.trim(),
+        pieces_per_carton:
+          payload.pieces_per_carton !== undefined
+            ? Math.max(1, Math.floor(payload.pieces_per_carton))
+            : undefined,
       }
 
       const { data, error } = await supabase
@@ -316,22 +327,21 @@ export const useInventoryStore = defineStore('inventory', () => {
   ): Promise<StoreResult<Product>> {
     isSaving.value = true
     try {
-      const validationError = validateProductImage(file)
+      const validationError = validateProductImageFile(file)
       if (validationError) {
         return { ok: false, message: validationError }
       }
 
       const product = products.value.find((entry) => entry.id === productId)
       const previousPath = storagePathFromPublicUrl(product?.image_url)
-
       const path = buildProductImagePath(productId, file)
-      const contentType = resolveImageMime(file) ?? file.type
+
       const { error: uploadError } = await supabase.storage
         .from(PRODUCT_IMAGES_BUCKET)
         .upload(path, file, {
           cacheControl: '3600',
           upsert: false,
-          contentType,
+          contentType: file.type,
         })
 
       if (uploadError) {
@@ -374,9 +384,7 @@ export const useInventoryStore = defineStore('inventory', () => {
     }
   }
 
-  async function removeProductImage(
-    productId: string,
-  ): Promise<StoreResult<Product>> {
+  async function clearProductImage(productId: string): Promise<StoreResult<Product>> {
     isSaving.value = true
     try {
       const product = products.value.find((entry) => entry.id === productId)
@@ -408,7 +416,7 @@ export const useInventoryStore = defineStore('inventory', () => {
 
       return { ok: true, data }
     } catch (error) {
-      console.error('[inventory] removeProductImage unexpected:', error)
+      console.error('[inventory] clearProductImage unexpected:', error)
       return { ok: false, message: 'حدث خطأ أثناء حذف صورة المنتج.' }
     } finally {
       isSaving.value = false
@@ -437,6 +445,6 @@ export const useInventoryStore = defineStore('inventory', () => {
     toggleProductActive,
     adjustStock,
     uploadProductImage,
-    removeProductImage,
+    clearProductImage,
   }
 })

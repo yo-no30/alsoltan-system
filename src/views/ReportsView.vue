@@ -11,6 +11,7 @@ import { useReports } from '@/composables/useReports'
 import { useToast } from '@/stores/toast'
 import { CURRENCY_LABEL, formatMoney } from '@/utils/currency'
 import { toDateInputValue } from '@/utils/dateRange'
+import { formatStockLabel } from '@/utils/stockUnits'
 import {
   buildTablePdf,
   downloadBlob,
@@ -96,6 +97,7 @@ function buildInventoryPdfInput() {
     headers: [
       'الاسم',
       'المخزون',
+      'قطعة/كرتون',
       'حد التنبيه',
       `سعر البيع (${CURRENCY_LABEL})`,
       `سعر التكلفة (${CURRENCY_LABEL})`,
@@ -103,7 +105,8 @@ function buildInventoryPdfInput() {
     ],
     rows: productsSnapshot.value.map((product) => [
       product.name,
-      product.stock_quantity,
+      formatStockLabel(product.stock_quantity, product.pieces_per_carton),
+      product.pieces_per_carton,
       product.min_stock_alert,
       formatMoney(Number(product.price)),
       formatMoney(Number(product.cost_price)),

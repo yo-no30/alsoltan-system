@@ -8,15 +8,18 @@ import AppSidebar from '@/components/layout/AppSidebar.vue'
     class="flex h-dvh min-h-0 overflow-hidden bg-slate-50"
     dir="rtl"
   >
+    <!-- Shell chrome (sidebar + header) stays at 100%; page content is denser. -->
     <AppSidebar />
 
     <div class="flex min-h-0 min-w-0 flex-1 flex-col">
       <AppHeader />
-      <main
-        class="flex min-h-0 min-w-0 flex-1 flex-col overflow-auto p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:p-4"
-      >
-        <slot />
-      </main>
+      <div class="app-workspace flex min-h-0 min-w-0 flex-1 flex-col">
+        <main
+          class="flex min-h-0 min-w-0 flex-1 flex-col overflow-auto p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:p-4"
+        >
+          <slot />
+        </main>
+      </div>
     </div>
   </div>
 </template>

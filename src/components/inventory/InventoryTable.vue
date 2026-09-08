@@ -1,5 +1,6 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import AppBadge from '@/components/ui/AppBadge.vue'
+import { formatStockLabel } from '@/utils/stockUnits'
 import type { Product } from '@/types/database.types'
 
 defineProps<{
@@ -24,11 +25,15 @@ function formatMoney(value: number): string {
 function isLowStock(product: Product): boolean {
   return product.stock_quantity <= product.min_stock_alert
 }
+
+function stockLabel(product: Product): string {
+  return formatStockLabel(product.stock_quantity, product.pieces_per_carton)
+}
 </script>
 
 <template>
   <div class="overflow-x-auto rounded-2xl border border-slate-200/70 bg-white shadow-sm">
-    <table class="min-w-[60rem] text-sm">
+    <table class="min-w-[64rem] text-sm">
       <thead class="border-b border-slate-200/70 bg-slate-50/80 text-slate-600">
         <tr>
           <th class="px-3 py-2 text-start font-medium">الصورة</th>
@@ -37,6 +42,7 @@ function isLowStock(product: Product): boolean {
           <th class="px-3 py-2 text-start font-medium">سعر البيع</th>
           <th class="px-3 py-2 text-start font-medium">سعر التكلفة</th>
           <th class="px-3 py-2 text-start font-medium">المخزون</th>
+          <th class="px-3 py-2 text-start font-medium">قطعة/كرتون</th>
           <th class="px-3 py-2 text-start font-medium">حد التنبيه</th>
           <th class="px-3 py-2 text-start font-medium">الحالة</th>
           <th class="px-3 py-2 text-start font-medium">إجراءات</th>
@@ -44,7 +50,7 @@ function isLowStock(product: Product): boolean {
       </thead>
       <tbody>
         <tr v-if="products.length === 0">
-          <td colspan="9" class="px-4 py-10 text-center text-slate-400">
+          <td colspan="10" class="px-4 py-10 text-center text-slate-400">
             لا توجد منتجات مطابقة
           </td>
         </tr>
@@ -79,10 +85,14 @@ function isLowStock(product: Product): boolean {
           </td>
           <td class="px-3 py-2 text-slate-900">{{ formatMoney(product.price) }}</td>
           <td class="px-3 py-2 text-slate-900">{{ formatMoney(product.cost_price) }}</td>
-          <td class="px-3 py-2 font-semibold text-slate-900">
-            {{ product.stock_quantity }}
+          <td class="px-3 py-2">
+            <div class="font-semibold text-slate-900">{{ stockLabel(product) }}</div>
+            <div class="text-[11px] text-slate-500">
+              {{ product.stock_quantity }} قطعة إجمالاً
+            </div>
           </td>
-          <td class="px-3 py-2 text-slate-600">{{ product.min_stock_alert }}</td>
+          <td class="px-3 py-2 text-slate-600">{{ product.pieces_per_carton }}</td>
+          <td class="px-3 py-2 text-slate-600">{{ product.min_stock_alert }} قطعة</td>
           <td class="px-3 py-2">
             <button
               type="button"

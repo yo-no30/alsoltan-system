@@ -64,15 +64,23 @@ async function onSaveProduct(payload: {
   cost_price: number
   stock_quantity: number
   min_stock_alert: number
+  pieces_per_carton: number
   is_active: boolean
+  image_url: string | null
   imageFile: File | null
-  removeImage: boolean
+  clearImage: boolean
 }): Promise<void> {
-  const { imageFile, removeImage, ...productFields } = payload
+  const { imageFile, clearImage, image_url, ...productFields } = payload
 
   const result = editingProduct.value
-    ? await inventory.updateProduct(editingProduct.value.id, productFields)
-    : await inventory.createProduct(productFields)
+    ? await inventory.updateProduct(editingProduct.value.id, {
+        ...productFields,
+        ...(imageFile || clearImage ? {} : { image_url }),
+      })
+    : await inventory.createProduct({
+        ...productFields,
+        image_url: imageFile ? null : image_url,
+      })
 
   if (!result.ok) {
     toast.error(result.message)
@@ -87,10 +95,10 @@ async function onSaveProduct(payload: {
       toast.error(imageResult.message)
       return
     }
-  } else if (removeImage) {
-    const removeResult = await inventory.removeProductImage(productId)
-    if (!removeResult.ok) {
-      toast.error(removeResult.message)
+  } else if (clearImage && editingProduct.value) {
+    const clearResult = await inventory.clearProductImage(productId)
+    if (!clearResult.ok) {
+      toast.error(clearResult.message)
       return
     }
   }

@@ -62,7 +62,17 @@ export const useCartStore = defineStore('cart', () => {
       return
     }
 
-    line.quantity = quantity
+    line.quantity = Math.floor(quantity)
+  }
+
+  function updateUnitPrice(productId: string, unitPrice: number): void {
+    const line = lines.value.find((entry) => entry.productId === productId)
+    if (!line) {
+      return
+    }
+
+    const safe = Number.isFinite(unitPrice) ? unitPrice : 0
+    line.unitPrice = roundMoney(Math.max(0, safe))
   }
 
   function increment(productId: string): void {
@@ -105,6 +115,7 @@ export const useCartStore = defineStore('cart', () => {
     lineTotal,
     addItem,
     updateQuantity,
+    updateUnitPrice,
     increment,
     decrement,
     removeItem,
